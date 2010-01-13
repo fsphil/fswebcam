@@ -142,13 +142,13 @@ int src_v4l_set_input(src_t *src, int fd,
 	
 	if(vd->channels == 0)
 	{
-		MSG("No inputs avaliable.");
+		MSG("No inputs available.");
 		return(-1);
 	}
 	
 	if(src->list & SRC_LIST_INPUTS)
 	{
-		HEAD("--- Avaliable inputs:");
+		HEAD("--- Available inputs:");
 		
 		count = 0;
 		vc->channel = count;
@@ -239,7 +239,7 @@ int src_v4l_set_tuner(src_t *src, int fd,
 	
 	if(vc->tuners == 0)
 	{
-		MSG("No tuners avaliable.");
+		MSG("No tuners available.");
 		return(-1);
 	}
 	
@@ -371,7 +371,7 @@ int src_v4l_set_picture(src_t *src, int fd, struct video_capability *vd)
 	{
 		int i;
 		
-		HEAD("--- Avaliable controls:");
+		HEAD("--- Available controls:");
 		
 		for(i = 0; i < 5; i++)
 		{
@@ -603,7 +603,7 @@ int src_v4l_set_mmap(src_t *src, int fd)
 		return(0);
 	}
 	
-	/* Find out how many buffers are avaliable. */
+	/* Find out how many buffers are available. */
 	if(ioctl(fd, VIDIOCGMBUF, &s->vm) < 0)
 	{
 		WARN("Error while querying buffers.");

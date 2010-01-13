@@ -945,7 +945,7 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 	if(!name) return(-1);
 	if(!strncmp(name, "-", 2) && config->background)
 	{
-		ERROR("stdout is unavalaible in background mode.");
+		ERROR("stdout is unavailable in background mode.");
 		return(-1);
 	}
 	

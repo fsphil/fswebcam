@@ -2,6 +2,8 @@
 fswebcam-201001??
   
   - LDFLAGS should come after object files. (Thomas Spahni)
+  - Don't display banner if the font fails to load. (Luca Niccoli)
+  - Fix typos.
 
 fswebcam-20091224
   

@@ -1,0 +1,22 @@
+
+fswebcam - Small and simple webcam software for *nix.
+
+Created by Philip Heron <phil@firestorm.cx>
+http://www.firestorm.cx/fswebcam/
+
+This is the program used to generate images for a webcam. It captures a number
+of frames from any V4L or V4L2 compatible device, averages them to reduce noise
+and draws the details on it using the GD Graphics Library which also handles
+compressing the image to PNG or JPEG.
+
+INSTALLING
+
+Run the following commands in the source folder to build and install fswebcam:
+
+./configure --prefix=/usr
+make
+make install
+
+It's only requirements are that the GD library be installed with JPEG, PNG
+and FreeType support.
+

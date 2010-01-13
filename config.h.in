@@ -1,0 +1,31 @@
+/* config.h.in.  Generated from configure.ac by autoheader.  */
+
+/* Define to 1 if you have a working `mmap' system call. */
+#undef HAVE_MMAP
+
+/* bktr source support. */
+#undef HAVE_BKTR
+
+/* V4L1 source support. */
+#undef HAVE_V4L1
+
+/* V4L2 source support. */
+#undef HAVE_V4L2
+
+/* Define to the address where bug reports for this package should be sent. */
+#undef PACKAGE_BUGREPORT
+
+/* Define to the full name of this package. */
+#undef PACKAGE_NAME
+
+/* Define to the full name and version of this package. */
+#undef PACKAGE_STRING
+
+/* Define to the one symbol short name of this package. */
+#undef PACKAGE_TARNAME
+
+/* Define to the version of this package. */
+#undef PACKAGE_VERSION
+
+/* Allow capture of 2^32 frames */
+#undef USE_32BIT_BUFFER

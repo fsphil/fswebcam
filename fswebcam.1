@@ -1,0 +1,425 @@
+.TH FSWEBCAM "1" "24 December 2009" "fswebcam 20091224" "User Commands"
+.SH NAME
+fswebcam \- Small and simple webcam for *nix.
+.SH SYNOPSIS
+.B fswebcam
+[\fI<options>\fR] \fI<filename>\fR [[\fI<options>\fR] \fI<filename>\fR ... ]
+.SH DESCRIPTION
+.PP
+fswebcam is a small and simple webcam app for *nix. It can capture images from a number of different sources and perform simple manipulation on the captured image. The image can be saved as one or more PNG or JPEG files.
+.PP
+The PNG or JPEG image can be sent to stdio using the filename "\-". The output filename is formatted by \fBstrftime\fR.
+
+.SH CONFIGURATION
+
+.SS
+Configuration File
+
+.TP
+Config files use the long version of options without the "\-\-" prefix. Comments start with a # symbol at the beginning of the line.
+
+.SS
+General Options
+
+.TP
+\fB\-?\fR, \fB\-\-help\fR
+Show a usage summary.
+
+.TP
+\fB\-c\fR, \fB\-\-config\fR
+Load options from a file. You can load more than one config file, and can mix them with command\-line arguments.
+
+Note: This option can not be used from within a configuration file.
+
+.TP
+\fB\-q\fR, \fB\-\-quiet\fR
+Hides all messages except errors.
+
+.TP
+\fB\-v\fR, \fB\-\-verbose\fR
+Print extra information during the capture process.
+
+.TP
+\fB\-\-version\fR
+Print the version number and exit.
+
+.TP
+\fB\-l\fR, \fB\-\-loop\fR \fI<frequency>\fR
+Continually capture images. The time between images is specified in seconds.
+.IP
+Default behaviour is to capture a single image and exit.
+.IP
+\fINote\fR: The time to capture the next image is calculated relative to the epoch, so an image will not be captured immediately when the program is first started.
+
+.TP
+\fB\-\-offset\fR \fI<seconds>\fR
+Sets the offset to use when calculating when the next image is due in loop mode. Value can be positive or negative.
+
+.TP
+\fB\-b\fR, \fB\-\-background\fR
+Run in the background. In this mode \fIstdout\fR and console logging are unavailable.
+
+.TP
+\fB\-\-pid\fR \fI<filename>\fR
+Saves the PID of the background process to the specified file. Ignored when not using background mode.
+
+.TP
+\fB\-\-log\fR \fI[file/syslog:]<filename>\fR
+Redirect log messages to a file or syslog. For example
+.IP
+\-\-log output.log
+.br
+\-\-log file:output.log
+.br
+\-\-log syslog
+
+.TP
+\fB\-\-gmt\fR
+Use GMT instead of the local timezone when formatting text with \fBstrftime\fR.
+
+.SS
+Capture Options
+
+.TP
+\fB\-d\fR, \fB\-\-device\fR \fI[<prefix>:]<device name>\fR
+Set the source or device to use. The source module is selected automatically unless specified in the prefix.
+.IP
+Default is \fI/dev/video0\fR.
+.IP
+Available source modules, in order of preference:
+.IP
+V4L2 \- Capture images from a V4L2 compatible video device.
+.br
+V4L1 \- Capture images from a V4L1 compatible video device.
+.br
+FILE \- Capture an image from a JPEG or PNG image file.
+.br
+RAW \- Reads images straight from a device or file.
+.br
+TEST \- Draws colour bars.
+
+.TP
+\fB\-i\fR, \fB\-\-input\fR \fI<input number or name>\fR
+Set the input to use. You may select an input by either it's number or name.
+.IP
+Default is "0".
+
+.TP
+\fB\-\-list\-inputs\fR
+List available inputs for the selected source or device.
+.IP
+fswebcam \-d v4l2:/dev/video1 \-\-list\-inputs
+
+.TP
+\fB\-t\fR, \fB\-\-tuner\fR \fI<tuner number>\fR
+Set the tuner to use.
+
+.TP
+\fB\-f\fR, \fB\-\-frequency\fR \fI<frequency>\fR
+Set the frequency of the selected input or tuner. The value may be read as KHz or MHz depending on the input or tuner.
+
+.TP
+\fB\-p\fR, \fB\-\-palette\fR \fI<name>\fR
+Try to use the specified image format when capturing the image.
+.IP
+Default is to select one automatically.
+.IP
+Supported formats:
+.IP
+PNG
+.br
+JPEG
+.br
+MJPEG
+.br
+RGB32
+.br
+RGB24
+.br
+BGR32
+.br
+BGR24
+.br
+YUYV
+.br
+UYVY
+.br
+YUV420P
+.br
+BAYER
+.br
+RGB565
+.br
+RGB555
+.br
+GREY
+
+.TP
+\fB\-r\fR, \fB\-\-resolution\fR \fI<dimensions>\fR
+Set the image resolution of the source or device. The actual resolution used may differ if the source or device cannot capture at the specified resolution.
+.IP
+Default is "384x288".
+
+.TP
+\fB\-\-list\-framesizes\fR
+Lists the supported resolutions for the selected source.
+
+.TP
+\fB\-\-list\-framerates\fR
+Lists the supported frame rates for the selected source and resolution.
+
+.TP
+\fB\-F\fR, \fB\-\-frames\fR \fI<number>\fR
+Set the number of frames to capture. More frames mean less noise in the final image, however capture times will be longer and moving objects may appear blurred.
+.IP
+Default is "1".
+
+.TP
+\fB\-S\fR, \fB\-\-skip\fR \fI<number>\fR
+Set the number of frames to skip. These frames will be captured but won't be use. Use this option if your camera sends some bad or corrupt frames when it first starts capturing.
+.IP
+Default is "0".
+
+.TP
+\fB\-D\fR, \fB\-\-delay\fR \fI<delay>\fR
+Inserts a delay after the source or device has been opened and initialised, and before the capture begins. Some devices need this delay to let the image settle after a setting has changed. The delay time is specified in seconds.
+
+.TP
+\fB\-R\fR, \fB\-\-read\fR
+Use read() to capture images. This can be slower but more stable with some devices.
+.IP
+Default is to use mmap(), falling back on read() if mmap() is unavailable.
+
+.TP
+\fB\-s\fR, \fB\-\-set\fR \fI<name=value>\fI
+Set a control. These are used by the source modules to control image or device parameters. Numeric values can be expressed as a percentage of there maximum range or a literal value, for example:
+.IP
+\-\-set brightness=50%
+\-\-set framerate=5
+.IP
+Non\-numeric controls are also supported:
+.IP
+\-\-set lights=on
+.IP
+V4L2 features a type of control called a 'button'. These controls do not take any value, but trigger an action. For example:
+.IP
+\-\-set "Restore Factory Settings"
+.IP
+Control names and values are not case sensitive.
+.IP
+\fINote\fR: Available controls will vary depending in the source module and devices used. For more information see the \fB\-\-list\-controls\fR option.
+
+.TP
+\fB\-\-list\-controls\fR
+List available controls and their current values for the selected source module and device. For example:
+.IP
+fswebcam \-d v4l2:/dev/video2 \-\-list\-controls
+
+.SS
+Output Options
+
+.TP
+These options are performed in the order they appear on the command line, only effecting images output later on the command line. For example:
+.IP
+fswebcam \-r 640x480 output1.jpeg \-\-scale 320x240 output2.jpeg
+.IP
+Will create two images, "output1.jpeg" containing a full resolution copy of the captured image and "output2.jpeg" containing the same captured image but scaled to half the size.
+
+.TP
+\fB\-\-no\-banner\fR
+Disable the banner.
+
+.TP
+\fB\-\-top\-banner\fR
+Position the banner at the top of the image.
+
+.TP
+\fB\-\-bottom\-banner\fR
+Position the banner at the bottom of the image.
+.IP
+This is the default.
+
+.TP
+\fB\-\-banner\-colour\fR \fI<#AARRGGBB>\fR
+Set the colour of the banner. Uses the web\-style hexadecimal format (#RRGGBB) to describe the colour, and can support an alpha channel (#AARRGGBB). Examples:
+.IP
+"#FF0000" is pure red.
+.br
+"#80000000" is semi\-transparent black.
+.br
+"#FF000000" is invisible (alpha channel is at maximum).
+.br
+Default is "#40263A93".
+
+.TP
+\fB\-\-line\-colour\fR \fI<#AARRGGBB>\fR
+Set the colour of the divider line. See \fB\-\-banner\-colour\fR for more information.
+.IP
+Default is "#00FF0000".
+
+.TP
+\fB\-\-text\-colour\fR \fI<#AARRGGBB>\fR
+Set the colour of the text. See \fB\-\-banner\-colour\fR for more information.
+.IP
+Default is "#00FFFFFF".
+
+.TP
+\fB\-\-font\fR \fI<[file or font name]:[font size]>\fR
+Set the font used in the banner. If no path is specified the path in the GDFONTPATH environment variable is searched for the font.
+.IP
+If no font size is specified the default of "10" will be used.
+.IP
+Default is "luxisr:10".
+
+.TP
+\fB\-\-no\-shadow\fR
+Disable the text shadow.
+
+.TP
+\fB\-\-shadow\fR
+Enable the text shadow.
+.IP
+This is the default behaviour.
+
+.TP
+\fB\-\-title\fR \fI<text>\fR
+Set the main text, located in the top left of the banner.
+
+.TP
+\fB\-\-no\-title\fR
+Clear the main text.
+
+.TP
+\fB\-\-subtitle\fR \fI<text>\fR
+Set the sub\-title text, located in the bottom left of the banner.
+
+.TP
+\fB\-\-no\-subtitle\fR
+Clear the sub\-title text.
+
+.TP
+\fB\-\-timestamp\fR \fI<text>\fR
+Set the timestamp text, located in the top right of the banner. This string is formatted by \fBstrftime\fP.
+.IP
+Default is "%Y\-%m\-%d %H:%M (%Z)".
+
+.TP
+\fB\-\-no\-timestamp\fR
+Clear the timestamp text.
+
+.TP
+\fB\-\-info\fR \fI<text>\fR
+Set the info text, located in the bottom right of the banner.
+
+.TP
+\fB\-\-no\-info\fR
+Clear the info text.
+
+.TP
+\fB\-\-underlay\fR \fI<filename>\fR
+Load a PNG image and overlay it on the image, below the banner. The image is aligned to the top left.
+.IP
+\fINote\fR: The underlay is only applied when saving an image and is not modified by any of the image options or effects.
+
+.TP
+\fB\-\-no\-underlay\fR
+Clear the underlay image.
+
+.TP
+\fB\-\-overlay\fR \fI<filename>\fR
+Load a PNG image and overlay on the image, above the banner. The image is aligned to the top left.
+.IP
+\fINote\fR: The overlay is only applied when saving an image and is not modified by any of the image options or effects.
+
+.TP
+\fB\-\-no\-overlay\fR
+Remove the overlay image.
+
+.TP
+\fB\-\-jpeg\fR \fI<factor>\fR
+Set JPEG as the output image format. The compression factor is a value between 0 and 95, or \-1 for automatic.
+.IP
+This is the default format, with a factor of "\-1".
+
+.TP
+\fB\-\-png\fR \fI<factor>\fR
+Set PNG as the output image format. The compression factor can be a value between 0 and 9, or \-1 for automatic.
+
+.TP
+\fB\-\-save\fR \fI<filename>\fR
+Saves the image to the specified filename.
+
+Note: This isn't necessary on the command\-line where a filename alone is enough to save an image.
+
+.TP
+\fB\-\-revert\fR
+Revert to the original captured image and resolution. This undoes all previous effects on the image.
+
+Note: This only reverts the image itself, and not options such as font, colours and overlay.
+
+.TP
+\fB\-\-flip\fR \fI<direction[,direction]>\fI
+Flips the image. Direction can be (h)orizontal or (v)ertical. Example:
+.IP
+\-\-flip h    Flips the image horizontally.
+.br
+\-\-flip h,v  Flips the image both horizontally and vertically.
+
+.TP
+\fB\-\-crop\fR \fI<dimensions[,offset]>\fR
+Crop the image. With no offset the cropped area will be the center of the image. Example:
+.IP
+\-\-crop 320x240    Crops the center 320x240 area of the image.
+.br
+\-\-crop 10x10,0x0  Crops the 10x10 area at the top left corner of the image.
+
+.TP
+\fB\-\-scale\fR <dimensions>
+Scale the image.
+.IP
+Example: "\-\-scale 640x480" scales the image up or down to 640x480.
+.IP
+\fINote:\fR The aspect ratio of the image is not maintained.
+
+.TP
+\fB\-\-rotate\fR \fI<angle>\fR
+Rotate the image in right angles (90, 180 and 270 degrees).
+.IP
+\fINote:\fR Rotating the image 90 or 270 degrees will swap the dimensions.
+
+.TP
+\fB\-\-deinterlace\fR
+Apply a simple deinterlacer to the image.
+
+.TP
+\fB\-\-invert\fR
+Invert all the colours in the image, creating a negative.
+
+.TP
+\fB\-\-exec\fR <command>
+Executes the specified command and waits for it to complete before continuing. The command line is formatted by \fBstrftime\fR.
+
+.SH SIGNALS
+
+.TP
+\fBSIGHUP\fR
+This causes fswebcam to reload it's configuration.
+
+.TP
+\fBSIGUSR1\fR
+Causes fswebcam to capture an image immediately without waiting on the timer in loop mode.
+
+.SH KNOWN BUGS
+The spacing between letters may be incorrect. This is an issue with the GD library.
+
+.SH REPORTING BUGS
+Please report bugs to <phil@firestorm.cx>.
+
+.SH SEE ALSO
+\fB
+ncftpput(1), strftime(3)
+\fP
+
+.SH AUTHOR
+Written by Philip Heron <phil@firestorm.cx>.
+

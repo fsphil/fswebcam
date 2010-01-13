@@ -1,0 +1,162 @@
+
+fswebcam-20091224
+  
+  - Fix memset() error in src_v4l1.c introduced in yesterdays release.
+    (Thomas Spahni)
+
+fswebcam-20091223
+  
+  - Stop configure warning about datarootdir being ignored.
+  - Updated the videodev.h and videodev2.h header files.
+  - Corrected a number of memory leaks and a potential buffer overflow.
+    (Thomas Spahni)
+  - Escape minus signs in the man page. (Luca Niccoli)
+  - Removed debian/ subdirectory. (Luca Niccoli)
+  - Removed spec and ebuild files.
+  - Free mmap()'s on error.
+  - Stop skipping frames on error.
+
+fswebcam-20070108
+  
+  - Fixed R<>B channel swap when using [M]JPEG or PNG.
+
+fswebcam-20061210
+  
+  - Added syslog support via log command.
+  - Added pidfile command for saving the process ID (PID) to file.
+  - The output command has been replaced by the log command.
+  - Added framedump command for dumping the raw captured data to file.
+  - Added exec command for running external programs after capture.
+  - Removed unnecessary malloc.h includes, replaced with the more portable
+    stdlib.h where not already included. (Alexander Logvinov)
+  - Fixed small bug in and simplified the configure script.
+  - Fixed a bug where fswebcam wouldn't close a device if its file descriptor
+    was equal to zero. Affected RAW and V4L2 sources. (Dmitry Saychenko)
+  - The localtime command has been replaced by the new gmt command.
+    The local timezone is now used as the default.
+  - Added offset command to offset capture times in loop mode.
+  - Added file-based configuration support.
+  - Updated argument parser.
+  - Renamed RGB24 and RGB32 to BGR24 and BGR32, and added the real
+    RGB24 and RGB32 formats.
+  - Added signal handler for gracefully exiting loop mode, reloading
+    file-based configuration or for immediately capturing an image.
+  - Don't force an interlaced mode when using V4L2 source.
+  - Fixed RAW source to fail when no more data can be read from source.
+  - Added RAW source to the man page.
+
+fswebcam-20060604
+  
+  - Even more configure fixes.
+  - Added NV12MB palette type (for raw source only).
+  - Added raw source support.
+  - V4L1/V4L2 header files included with source.
+  - More V4L2 configure fixes. (Gary E. Miller)
+
+fswebcam-20060424
+  
+  - Improved V4L2 detection in configure script.
+  - Warn if there have been unsaved changes made to the image.
+  - Fixed a number of small message formatting errors.
+  - Fixed man page formatting.
+  - Be more verbose when adjusting to a new resolution. (Alexandre Bourget)
+  - Added MJPEG palette type.
+
+fswebcam-20060415
+  
+  - Many other small fixes and changes.
+  - Insert DHT segment if missing from MJPEG frames. (Scott J. Bertin)
+  - Properly sets up resolution for V4L1 sources.
+  - New autoconf based configuration system.
+  - Added read support to V4L1 and V4L2 sources (if mmap is unavailable),
+    and an option to force read.
+  - Loop and background modes, allowing the program to run as a daemon.
+  - New job queue allows multiple images to be output from a single run,
+    each with different attributes.
+  - Filenames are now processed by strftime().
+  - Inputs can now be specified by name.
+  - Tweaked the deinterlacer a bit more.
+  - Timeout when devices take too long delivering a frame.
+  - Added support for YUYV and UYVY colour formats.
+  - Added support for the "Bayer Encoding" colour format. (V4L2 only)
+  - New source system added, allowing for more source types. Including:
+    
+    v4l2 - Captures images using the V4L2 API.
+    v4l1 - The old V4L1 capture code has been moved here.
+    file - Reads a JPEG or PNG image from disk.
+    test - Draws colour bars.
+    
+  - Release mmap before device is closed.
+  - Changed some char's to int8_t's for platforms where char may be unsigned.
+
+fswebcam-20050529
+  
+  - Added option to skip a number of frames at the start of capture. This
+    helps when some of the early frames are corrupted like with the QuickCam.
+  - Added a test to make sure the selected font is useable.
+  - Added compile time option for increasing the number of frames that can be
+    captured and averaged.
+  - Fixed colour problem when using a JPEG capture device.
+  - Tweaked the deinterlacer a bit to reduce blurring in static areas.
+  - Removed some test code from the deinterlacer that found it's way into the
+    last release. D'oh!
+
+fswebcam-20050519
+
+  - When capturing from a QX5 microscope, the lights are turned on.
+    This will be removed when a separate light control app exists.
+  - Added support for MJPEG devices.
+  - Removed vflip and hflip options as this is done now with the flip effect.
+  - New effects system added, including:
+
+    flip        - Flips the image horizontally or vertically.
+    crop        - Crops a part of the image.
+    scale       - Scales the image to a new size.
+    rotate      - Rotates the image in right angles 90, 180 and 270 degrees.
+    deinterlace - A simple deinterlacer for video capture cards.
+    invert      - Inverts the colours of the image, creating a negative.
+
+  - Capture width and height options combined into single resolution option.
+  - Releases capture device as soon as capturing is finished.
+  - Capture device is opened read/write instead of read only.
+  - Some small cosmetic fixes.
+
+fswebcam-20050308
+
+  - Added options to flip the image horizontally and vertically.
+  - Added missing copy of the GPL license.
+
+fswebcam-20050211
+
+  - Default frame count is now 1.
+  - Now using the faster integer-based YUV420P conversion code from camE:
+    http://linuxbrit.co.uk/camE/
+  - Added support for two more colour formats: RGB565 RGB555
+  - Added depth information into the palette table.
+  - Verbose mode now shows information about the size and number of buffers.
+
+fswebcam-20050210
+
+  - Added support for multiple colour formats: RGB32 RGB24 YUV420P GREY
+
+fswebcam-20041219
+
+  - Added an option to delay while a capture device settles down after a
+    channel or input change.
+
+fswebcam-20041031
+
+  - Tuner code was broken in yesterdays release. This fixes that as
+    well as adding awareness for low and high frequency ranges (KHz and MHz).
+
+fswebcam-20041030
+
+  - Much better now at preparing the capture device.
+  - Added many more options to control the banner.
+  - Added support for underlay and overlay images.
+  - A much needed cleanup.
+
+fswebcam-20040731
+
+  - Initial release.
+

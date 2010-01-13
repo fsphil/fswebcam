@@ -937,6 +937,7 @@ gdImage* fswc_gdImageDuplicate(gdImage* src)
 
 int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 {
+	char *err;
 	char filename[FILENAME_MAX];
 	gdImage *im;
 	FILE *f;
@@ -961,6 +962,14 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 	
 	/* Draw the underlay. */
 	fswc_draw_overlay(config, config->underlay, im);
+	
+	/* Check if drawing text works */
+	if(err = gdImageStringFT(NULL, NULL, 0, config->font, config->fontsize, 0.0, 0, 0, ""))
+	{
+		WARN("Unable to load font '%s': %s", config->font, err);
+		WARN("Disabling the banner.");
+		config->banner = NO_BANNER;
+	}
 	
 	/* Draw the banner. */
 	if(config->banner != NO_BANNER) fswc_draw_banner(config, im);

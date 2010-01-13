@@ -1,4 +1,8 @@
 
+fswebcam-201001??
+  
+  - LDFLAGS should come after object files. (Thomas Spahni)
+
 fswebcam-20091224
   
   - Fix memset() error in src_v4l1.c introduced in yesterdays release.

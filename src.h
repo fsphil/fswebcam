@@ -32,9 +32,10 @@
 #define SRC_PAL_YUV420P (9)
 #define SRC_PAL_NV12MB  (10)
 #define SRC_PAL_BAYER   (11)
-#define SRC_PAL_RGB565  (12)
-#define SRC_PAL_RGB555  (13)
-#define SRC_PAL_GREY    (14)
+#define SRC_PAL_SGBRG8  (12)
+#define SRC_PAL_RGB565  (13)
+#define SRC_PAL_RGB555  (14)
+#define SRC_PAL_GREY    (15)
 
 #define SRC_LIST_INPUTS     (1 << 1)
 #define SRC_LIST_TUNERS     (1 << 2)

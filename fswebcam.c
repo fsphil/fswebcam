@@ -597,7 +597,13 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 	 * GRGRGRGRGR
 	 * BGBGBGBGBG
 	 * GRGRGRGRGR
-	 *
+	 * 
+	 * SGBRG8 bayer pattern:
+	 * 
+	 * GBGBGBGBGB
+	 * RGRGRGRGRG
+	 * GBGBGBGBGB
+	 * RGRGRGRGRG
 	*/
 	
 	while(i-- > 0)
@@ -605,6 +611,7 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 		uint8_t *p[8];
 		uint8_t hn, vn, di;
 		uint8_t r, g, b;
+		int mode;
 		
 		/* Setup pointers to this pixel's neighbours. */
 		p[0] = img - w - 1;
@@ -628,7 +635,11 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 		di = (*p[0] + *p[2] + *p[5] + *p[7]) / 4;
 		
 		/* Calculate RGB */
-		if((x + y) & 0x01)
+		mode = (x + y) & 0x01;
+		if(src->palette == SRC_PAL_SGBRG8)
+			mode = ~mode;
+		
+		if(mode)
 		{
 			g = *img;
 			if(y & 0x01) { r = hn; b = vn; }
@@ -937,7 +948,6 @@ gdImage* fswc_gdImageDuplicate(gdImage* src)
 
 int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 {
-	char *err;
 	char filename[FILENAME_MAX];
 	gdImage *im;
 	FILE *f;
@@ -1153,6 +1163,7 @@ int fswc_grab(fswebcam_config_t *config)
 			fswc_add_image_bgr24(&src, abitmap);
 			break;
 		case SRC_PAL_BAYER:
+		case SRC_PAL_SGBRG8:
 			fswc_add_image_bayer(&src, abitmap);
 			break;
 		case SRC_PAL_YUYV:

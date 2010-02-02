@@ -58,6 +58,7 @@ src_palette_t src_palette[] = {
 	{ "YUV420P" },
 	{ "NV12MB" },
 	{ "BAYER" },
+	{ "SGBRG8" },
 	{ "RGB565" },
 	{ "RGB555" },
 	{ "GREY" },

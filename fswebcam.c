@@ -90,6 +90,7 @@
 #define OPT_SAVE            (OPTBASE + 46)
 #define OPT_EXEC            (OPTBASE + 47)
 #define OPT_DUMPFRAME       (OPTBASE + 48)
+#define OPT_FPS             (OPTBASE + 49)
 
 typedef struct {
 	
@@ -138,6 +139,7 @@ typedef struct {
 	unsigned int width;
 	unsigned int height;
 	unsigned int frames;
+	unsigned int fps;
 	unsigned int skipframes;
 	int palette;
 	src_option_t **option;
@@ -1086,6 +1088,7 @@ int fswc_grab(fswebcam_config_t *config)
 	src.palette    = config->palette;
 	src.width      = config->width;
 	src.height     = config->height;
+	src.fps        = config->fps;
 	src.option     = config->option;
 	
 	HEAD("--- Opening %s...", config->device);
@@ -1592,6 +1595,7 @@ int fswc_usage()
 	       " -p, --palette <name>         Selects the palette format to use.\n"
 	       " -D, --delay <number>         Sets the pre-capture delay time. (seconds)\n"
 	       " -r, --resolution <size>      Sets the capture resolution.\n"
+	       "     --fps <framerate>        Sets the capture frame rate.\n"
 	       " -F, --frames <number>        Sets the number of frames to capture.\n"
 	       " -S, --skip <number>          Sets the number of frames to skip.\n"
 	       "     --dumpframe <filename>   Dump a raw frame frame to file.\n"
@@ -1899,6 +1903,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	config->list = 0;
 	config->width = 384;
 	config->height = 288;
+	config->fps = 0;
 	config->frames = 1;
 	config->skipframes = 0;
 	config->palette = SRC_PAL_ANY;
@@ -1986,6 +1991,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		case 'r':
 	 		config->width  = argtol(optarg, "x ", 0, 0, 10);
 			config->height = argtol(optarg, "x ", 1, 0, 10);
+			break;
+		case OPT_FPS:
+			config->fps = atoi(optarg);
 			break;
 		case 'F':
 			config->frames = atoi(optarg);

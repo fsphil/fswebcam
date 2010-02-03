@@ -161,6 +161,12 @@ Set the image resolution of the source or device. The actual resolution used may
 Default is "384x288".
 
 .TP
+\fB\-\-fps\fR \fI<frames per second>\fR
+Sets the frame rate of the capture device. This currently only works with certain V4L2 devices.
+.IP
+Default is "0", let the device decide.
+
+.TP
 \fB\-F\fR, \fB\-\-frames\fR \fI<number>\fR
 Set the number of frames to capture. More frames mean less noise in the final image, however capture times will be longer and moving objects may appear blurred.
 .IP

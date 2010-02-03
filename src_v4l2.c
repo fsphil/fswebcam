@@ -853,7 +853,7 @@ int src_v4l2_open(src_t *src)
 		return(-1);
 	}
 	
-	/* Set the frame-rate. */
+	/* Set the frame-rate if > 0 */
 	if(src->fps) src_v4l2_set_fps(src);
 	
 	/* Delay to let the image settle down. */

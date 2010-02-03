@@ -630,6 +630,27 @@ int src_v4l2_set_pix_format(src_t *src)
 	return(-1);
 }
 
+int src_v4l2_set_fps(src_t *src)
+{
+	src_v4l2_t *s = (src_v4l2_t *) src->state;
+	struct v4l2_streamparm setfps;
+	
+	memset(&setfps, 0, sizeof(setfps));
+	
+	setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	setfps.parm.capture.timeperframe.numerator = 1;
+	setfps.parm.capture.timeperframe.denominator = src->fps;
+	if(ioctl(s->fd, VIDIOC_S_PARM, setfps) == -1)
+	{
+		/* Not fatal - just warn about it */
+		WARN("Error setting frame rate:");
+		WARN("VIDIOC_S_PARM: %s", strerror(errno));
+		return(-1);
+	}
+	
+	return(0);
+}
+
 int src_v4l2_free_mmap(src_t *src)
 {
 	src_v4l2_t *s = (src_v4l2_t *) src->state;
@@ -831,6 +852,9 @@ int src_v4l2_open(src_t *src)
 		src_close(src);
 		return(-1);
 	}
+	
+	/* Set the frame-rate. */
+	if(src->fps) src_v4l2_set_fps(src);
 	
 	/* Delay to let the image settle down. */
 	if(src->delay)

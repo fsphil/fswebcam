@@ -86,10 +86,11 @@ typedef struct {
 	int palette;
 	uint32_t width;
 	uint32_t height;
+	uint32_t fps;
 	
 	src_option_t **option;
 	
-	/* Info */
+	/* For calculating capture FPS */
 	uint32_t captured_frames;
 	struct timeval tv_first;
 	struct timeval tv_last;

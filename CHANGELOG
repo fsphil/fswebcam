@@ -1,10 +1,11 @@
 
-fswebcam-201001??
+fswebcam-201002??
   
   - LDFLAGS should come after object files. (Thomas Spahni)
   - Don't display banner if the font fails to load. (Luca Niccoli)
   - Fix typos.
   - Added SGBRG8 palette type (for V4L2 source only).
+  - Added --fps option.
 
 fswebcam-20091224
   

@@ -1906,22 +1906,6 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	config->dumpframe = NULL;
 	config->jobs = 0;
 	config->job = NULL;
-	//config->banner = BOTTOM_BANNER;
-	//config->bg_colour = 0;
-	//config->bl_colour = 0;
-	//config->fg_colour = 0;
-	//config->title = NULL;
-	//config->subtitle = NULL;
-	//config->timestamp = NULL;
-	//config->info = NULL;
-	//config->font = NULL;
-	//config->fontsize = 0;
-	//config->shadow = 0;
-	//config->underlay = NULL;
-	//config->overlay = NULL;
-	//config->filename = NULL;
-	//config->format = FORMAT_JPEG;
-	//config->compression = -1;
 	
 	/* Don't report errors. */
 	opterr = 0;

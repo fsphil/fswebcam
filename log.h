@@ -1,11 +1,11 @@
-/* fswebcam - FireStorm.cx's webcam generator                */
-/*===========================================================*/
-/* Copyright (C)2005 Philip Heron <phil@firestorm.cx>        */
-/*                                                           */
-/* This program is distributed under the terms of the GNU    */
-/* General Public License, version 2. You may use, modify,   */
-/* and redistribute it under the terms of this license. A    */
-/* copy should be included with this source.                 */
+/* fswebcam - FireStorm.cx's webcam generator                 */
+/*============================================================*/
+/* Copyright (C)2005-2010 Philip Heron <phil@sanslogic.co.uk> */
+/*                                                            */
+/* This program is distributed under the terms of the GNU     */
+/* General Public License, version 2. You may use, modify,    */
+/* and redistribute it under the terms of this license. A     */
+/* copy should be included with this source.                  */
 
 #ifndef INC_LOG_H
 #define INC_LOG_H

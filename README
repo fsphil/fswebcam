@@ -1,8 +1,8 @@
 
 fswebcam - Small and simple webcam software for *nix.
 
-Created by Philip Heron <phil@firestorm.cx>
-http://www.firestorm.cx/fswebcam/
+Created by Philip Heron <phil@sanslogic.co.uk>
+http://www.sanslogic.co.uk/fswebcam/
 
 This is the program used to generate images for a webcam. It captures a number
 of frames from any V4L or V4L2 compatible device, averages them to reduce noise

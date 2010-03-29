@@ -542,7 +542,9 @@ int src_v4l2_set_pix_format(src_t *src)
 	
 	while(ioctl(s->fd, VIDIOC_ENUM_FMT, &fmt) != -1)
 	{
-		DEBUG("%i: %c%c%c%c (%s)", v4l2_pal,
+		DEBUG("%i: '%c%c%c%c' [%02X%02X%02X%02X] (%s)", v4l2_pal,
+		      fmt.pixelformat >> 0,  fmt.pixelformat >> 8,
+		      fmt.pixelformat >> 16, fmt.pixelformat >> 24,
 		      fmt.pixelformat >> 0,  fmt.pixelformat >> 8,
 		      fmt.pixelformat >> 16, fmt.pixelformat >> 24,
 		      fmt.description);

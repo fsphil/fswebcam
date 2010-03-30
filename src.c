@@ -59,6 +59,7 @@ src_palette_t src_palette[] = {
 	{ "NV12MB" },
 	{ "BAYER" },
 	{ "SGBRG8" },
+	{ "SGRBG8" },
 	{ "RGB565" },
 	{ "RGB555" },
 	{ "GREY" },

@@ -606,6 +606,13 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 	 * RGRGRGRGRG
 	 * GBGBGBGBGB
 	 * RGRGRGRGRG
+	 *
+	 * SGRBG8 bayer pattern:
+	 *
+	 * GRGRGRGRGR
+	 * BGBGBGBGBG
+	 * GRGRGRGRGR
+	 * BGBGBGBGBG
 	*/
 	
 	while(i-- > 0)
@@ -638,7 +645,7 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 		
 		/* Calculate RGB */
 		mode = (x + y) & 0x01;
-		if(src->palette == SRC_PAL_SGBRG8)
+		if(src->palette == SRC_PAL_SGBRG8 || src->palette == SRC_PAL_SGRBG8)
 			mode = ~mode;
 		
 		if(mode)
@@ -649,6 +656,13 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 		}
 		else if(y & 0x01) { r = *img; g = (vn + hn) / 2; b = di; }
 		else              { b = *img; g = (vn + hn) / 2; r = di; }
+		
+		if(src->palette == SRC_PAL_SGRBG8)
+		{
+			uint8_t t = r;
+			r = b;
+			b = t;
+		}
 		
 		*(abitmap++) += r;
 		*(abitmap++) += g;
@@ -1167,6 +1181,7 @@ int fswc_grab(fswebcam_config_t *config)
 			break;
 		case SRC_PAL_BAYER:
 		case SRC_PAL_SGBRG8:
+		case SRC_PAL_SGRBG8:
 			fswc_add_image_bayer(&src, abitmap);
 			break;
 		case SRC_PAL_YUYV:

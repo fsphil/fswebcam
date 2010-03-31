@@ -644,9 +644,8 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 		di = (*p[0] + *p[2] + *p[5] + *p[7]) / 4;
 		
 		/* Calculate RGB */
-		mode = (x + y) & 0x01;
-		if(src->palette == SRC_PAL_SGBRG8 || src->palette == SRC_PAL_SGRBG8)
-			mode = ~mode;
+		if(src->palette == SRC_PAL_BAYER) mode = (x + y) & 0x01;
+		else mode = ~(x + y) & 0x01;
 		
 		if(mode)
 		{

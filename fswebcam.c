@@ -1845,6 +1845,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"frequency",       required_argument, 0, 'f'},
 		{"delay",           required_argument, 0, 'D'},
 		{"resolution",      required_argument, 0, 'r'},
+		{"fps",	            required_argument, 0, OPT_FPS},
 		{"list-framesizes", no_argument,       0, OPT_LIST_FRAMESIZES},
 		{"list-framerates", no_argument,       0, OPT_LIST_FRAMERATES},
 		{"frames",          required_argument, 0, 'F'},

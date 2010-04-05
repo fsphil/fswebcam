@@ -118,7 +118,7 @@ int src_v4l2_set_input(src_t *src)
 	
 	if(src->list & SRC_LIST_INPUTS)
 	{
-		HEAD("--- Avaliable inputs:");
+		HEAD("--- Available inputs:");
 		
 		input.index = count;
 		while(!ioctl(s->fd, VIDIOC_ENUMINPUT, &input))

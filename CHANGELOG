@@ -1,4 +1,8 @@
 
+fswebcam-2010????
+  
+  - Add basic Y16 support (16-bit greyscale, gets shifted down to 8-bit)
+
 fswebcam-20100405
   
   - Fix typo and add missing code for parsing --fps option. (Luca Niccoli)

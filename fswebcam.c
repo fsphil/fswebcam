@@ -828,6 +828,23 @@ int fswc_add_image_nv12mb(src_t *src, avgbmp_t *abitmap)
 	return(0);
 }
 
+int fswc_add_image_y16(src_t *src, avgbmp_t *abitmap)
+{
+	uint16_t *bitmap = (uint16_t *) src->img;
+	uint32_t i = src->width * src->height;
+	
+	if(src->length < i) return(-1);
+	
+	while(i-- > 0)
+	{
+		*(abitmap++) += *bitmap >> 8;
+		*(abitmap++) += *bitmap >> 8;
+		*(abitmap++) += *(bitmap++) >> 8;
+	}
+	
+	return(0);
+}
+
 int fswc_add_image_grey(src_t *src, avgbmp_t *abitmap)
 {
 	uint8_t *bitmap = (uint8_t *) src->img;
@@ -1198,6 +1215,9 @@ int fswc_grab(fswebcam_config_t *config)
 			break;
 		case SRC_PAL_RGB555:
 			fswc_add_image_rgb555(&src, abitmap);
+			break;
+		case SRC_PAL_Y16:
+			fswc_add_image_y16(&src, abitmap);
 			break;
 		case SRC_PAL_GREY:
 			fswc_add_image_grey(&src, abitmap);

@@ -29,7 +29,7 @@
 
 extern void log_set_fd(int fd);
 extern int  log_open(char *f);
-extern void log_close();
+extern void log_close(void);
 extern void log_quiet(char v);
 extern void log_verbose(char v);
 extern void log_debug(char v);

@@ -376,36 +376,36 @@ int src_v4l_set_picture(src_t *src, int fd, struct video_capability *vd)
 		for(i = 0; i < 5; i++)
 		{
 			char *name = NULL;
-			int value;
+			int val;
 			char t[64];
 			
 			switch(i)
 			{
 			case 0:
 				name = "brightness";
-				value = vp.brightness;
+				val = vp.brightness;
 				break;
 			case 1:
 				name = "hue";
-				value = vp.hue;
+				val = vp.hue;
 				break;
 			case 2:
 				name = "colour";
-				value = vp.colour;
+				val = vp.colour;
 				break;
 			case 3:
 				name = "contrast";
-				value = vp.contrast;
+				val = vp.contrast;
 				break;
 			case 4:
 				name = "whiteness";
-				value = vp.whiteness;
+				val = vp.whiteness;
 				break;
 			}
 			
 			snprintf(t, 63, "%i (%i%%)",
-			        SCALE(-100, 100, 0x0000, 0xFFFF, vp.brightness),
-			        SCALE(0, 100, 0x0000, 0xFFFF, vp.brightness));
+			        SCALE(-100, 100, 0x0000, 0xFFFF, val),
+			        SCALE(0, 100, 0x0000, 0xFFFF, val));
 			
 			MSG("%-25s %-15s 100 - -100", name, t);
 		}

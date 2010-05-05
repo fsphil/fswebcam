@@ -46,6 +46,8 @@ typedef struct {
 	
 } src_v4l_t;
 
+static int src_v4l_close(src_t *src);
+
 typedef struct {
 	uint16_t src;
 	uint16_t v4l;
@@ -666,7 +668,7 @@ int src_v4l_set_read(src_t *src)
 	if(!s->buffer)
 	{
 		ERROR("Out of memory.");
-		src_close(src);
+		src_v4l_close(src);
 		return(-1);
 	}
 	
@@ -692,7 +694,7 @@ int src_v4l_queue_buffers(src_t *src)
 	return(0);
 }
 
-int src_v4l_open(src_t *src)
+static int src_v4l_open(src_t *src)
 {
 	src_v4l_t *s;
 	struct video_capability vd;
@@ -734,14 +736,14 @@ int src_v4l_open(src_t *src)
 	/* Get the device capabilities. */
 	if(src_v4l_get_capability(src, s->fd, &vd))
 	{
-		src_close(src);
+		src_v4l_close(src);
 		return(-2);
 	}
 	
 	/* Set the input. */
 	if(src_v4l_set_input(src, s->fd, &vd, &vc))
 	{
-		src_close(src);
+		src_v4l_close(src);
 		return(-1);
 	}
 	
@@ -750,14 +752,14 @@ int src_v4l_open(src_t *src)
 		/* Set the tuner. */
 		if(src_v4l_set_tuner(src, s->fd, &vc, &vt))
 		{
-			src_close(src);
+			src_v4l_close(src);
 			return(-1);
 		}
 		
 		/* Set the frequency. */
 		if(src_v4l_set_frequency(src, s->fd, &vt))
 		{
-			src_close(src);
+			src_v4l_close(src);
 			return(-1);
 		}
 	}
@@ -765,7 +767,7 @@ int src_v4l_open(src_t *src)
 	/* Set the picture options. */
 	if(src_v4l_set_picture(src, s->fd, &vd))
 	{
-		src_close(src);
+		src_v4l_close(src);
 		return(-1);
 	}
 	
@@ -785,14 +787,14 @@ int src_v4l_open(src_t *src)
 	
 	if(src->use_read && src_v4l_set_read(src))
 	{
-		src_close(src);
+		src_v4l_close(src);
 		return(-1);
 	}
 	
 	/* If this is an MJPEG device, queue the buffers. */
 	if(src->palette == SRC_PAL_JPEG && src_v4l_queue_buffers(src))
 	{
-		src_close(src);
+		src_v4l_close(src);
 		return(-1);
 	}
 	
@@ -802,7 +804,7 @@ int src_v4l_open(src_t *src)
 	return(0);
 }
 
-int src_v4l_close(src_t *src)
+static int src_v4l_close(src_t *src)
 {
 	src_v4l_t *s = (src_v4l_t *) src->state;
 	
@@ -850,7 +852,7 @@ int src_v4l_grab_mjpeg(src_t *src)
 	return(0);
 }
 
-int src_v4l_grab(src_t *src)
+static int src_v4l_grab(src_t *src)
 {
 	src_v4l_t *s = (src_v4l_t *) src->state;
 	

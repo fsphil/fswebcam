@@ -567,6 +567,7 @@ int src_v4l_free_mmap(src_t *src)
 		munmap(s->map, s->mjpeg_breq.count * s->mjpeg_breq.size);
 	else
 		munmap(s->map, s->vm.size);
+	s->map = NULL;
 	
 	return(0);
 }

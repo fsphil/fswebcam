@@ -113,7 +113,7 @@ int src_open(src_t *src, char *source)
 			i = src_mod[src->type]->open(src);
 			if(i < 0)
 			{
-				free(s);
+				if(src->source) free(src->source);
 				return(-1);
 			}
 			

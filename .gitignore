@@ -15,4 +15,5 @@ fswebcam
 config.h
 config.log
 config.status
+*.cache
 

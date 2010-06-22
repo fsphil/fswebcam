@@ -1,7 +1,9 @@
 
-fswebcam-2010????
+fswebcam-20100622
   
-  - Add basic Y16 support (16-bit greyscale, gets shifted down to 8-bit)
+  - Add basic Y16 support. (16-bit greyscale, gets shifted down to 8-bit)
+  - A few fixes for the V4L1 source and other areas. (Pete Zaitcev)
+  - Format conversions have been separated out from fswebcam.c.
 
 fswebcam-20100405
   

@@ -1,4 +1,8 @@
 
+fswebcam-?
+  
+  - Enable libgd fontconfig support if avaiable. Default font is now "sans:10".
+
 fswebcam-20100622
   
   - Add basic Y16 support. (16-bit greyscale, gets shifted down to 8-bit)

@@ -737,7 +737,7 @@ int fswc_grab(fswebcam_config_t *config)
 	config->bg_colour    = 0x40263A93;
 	config->bl_colour    = 0x00FF0000;
 	config->fg_colour    = 0x00FFFFFF;
-	config->font         = strdup("luxisr");
+	config->font         = strdup("sans");
 	config->fontsize     = 10;
 	config->shadow       = 1;
 	config->title        = NULL;

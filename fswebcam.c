@@ -1591,6 +1591,9 @@ int main(int argc, char *argv[])
 	/* Setup signal handlers. */
 	if(fswc_setup_signals()) return(-1);
 	
+	/* Enable FontConfig support in GD */
+	if(!gdFTUseFontConfig(1)) DEBUG("gd has no fontconfig support");
+	
 	/* Capture the image(s). */
 	if(!config->loop) fswc_grab(config);
 	else

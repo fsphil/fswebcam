@@ -15,14 +15,12 @@
 #include "fswebcam.h"
 #include "src.h"
 
-int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
+int fswc_add_image_bayer(avgbmp_t *dst, uint8_t *img, uint32_t length, uint32_t w, uint32_t h, int palette)
 {
-	uint8_t *img = src->img;
 	uint32_t x = 0, y = 0;
-	uint32_t w = src->width, h = src->height;
 	uint32_t i = w * h;
 	
-	if(src->length < i) return(-1);
+	if(length < i) return(-1);
 	
 	/* SBGGR8 bayer pattern:
 	 * 
@@ -75,7 +73,7 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 		di = (*p[0] + *p[2] + *p[5] + *p[7]) / 4;
 		
 		/* Calculate RGB */
-		if(src->palette == SRC_PAL_BAYER) mode = (x + y) & 0x01;
+		if(palette == SRC_PAL_BAYER) mode = (x + y) & 0x01;
 		else mode = ~(x + y) & 0x01;
 		
 		if(mode)
@@ -87,16 +85,16 @@ int fswc_add_image_bayer(src_t *src, avgbmp_t *abitmap)
 		else if(y & 0x01) { r = *img; g = (vn + hn) / 2; b = di; }
 		else              { b = *img; g = (vn + hn) / 2; r = di; }
 		
-		if(src->palette == SRC_PAL_SGRBG8)
+		if(palette == SRC_PAL_SGRBG8)
 		{
 			uint8_t t = r;
 			r = b;
 			b = t;
 		}
 		
-		*(abitmap++) += r;
-		*(abitmap++) += g;
-		*(abitmap++) += b;
+		*(dst++) += r;
+		*(dst++) += g;
+		*(dst++) += b;
 		
 		/* Move to the next pixel (or line) */
 		if(++x == w) { x = 0; y++; }

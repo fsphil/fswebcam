@@ -634,7 +634,7 @@ int fswc_grab(fswebcam_config_t *config)
 			fswc_add_image_jpeg(&src, abitmap);
 			break;
 		case SRC_PAL_S561:
-			fswc_add_image_s561(&src, abitmap);
+			fswc_add_image_s561(abitmap, src.img, src.length, src.width, src.height, src.palette);
 			break;
 		case SRC_PAL_RGB32:
 			fswc_add_image_rgb32(&src, abitmap);
@@ -651,7 +651,7 @@ int fswc_grab(fswebcam_config_t *config)
 		case SRC_PAL_BAYER:
 		case SRC_PAL_SGBRG8:
 		case SRC_PAL_SGRBG8:
-			fswc_add_image_bayer(&src, abitmap);
+			fswc_add_image_bayer(abitmap, src.img, src.length, src.width, src.height, src.palette);
 			break;
 		case SRC_PAL_YUYV:
 		case SRC_PAL_UYVY:

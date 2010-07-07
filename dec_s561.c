@@ -882,32 +882,28 @@ static int spca561_decode(int width, int height,
 
 /* FIXME, change spca561_decode not to need the extra border
    around its dest buffer */
-int fswc_add_image_s561(src_t *src, avgbmp_t *abitmap)
+int fswc_add_image_s561(avgbmp_t *dst, uint8_t *img, uint32_t length, uint32_t width, uint32_t height, int palette)
 {
 	int x, y;
 	uint8_t *s, *d;
-	unsigned char tmpbuf[650 * 490];
+	unsigned char tmpimg[650 * 490];
 	
-	if(spca561_decode(src->width, src->height, src->img, tmpbuf) != 0)
+	if(spca561_decode(width, height, img, tmpimg) != 0)
 	{
 		ERROR("spca561_decode() failed");
 		return(-1);
 	}
 	
 	/* Remove buffer border */
-	//d = tmpbuf;
-	s = tmpbuf + 2 * (src->width + 6) + 3;
-	for(y = 0; y < src->height; y++)
+	d = tmpimg;
+	s = tmpimg + 2 * (width + 6) + 3;
+	for(y = 0; y < height; y++)
 	{
-		for(x = 0; x < src->width; x++)
-		{
-			*(abitmap++) += *s;
-			*(abitmap++) += *s;
-			*(abitmap++) += *s;
-			s++;
-		}
-		d += 6;
+		for(x = 0; x < width; x++) *(d++) = *(s++);
+		s += 6;
 	}
+	
+	fswc_add_image_bayer(dst, tmpimg, width * height, width, height, SRC_PAL_SGBRG8);
 	
 	return(0);
 }

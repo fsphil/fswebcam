@@ -34,5 +34,7 @@ extern int fswc_add_image_yuyv(src_t *src, avgbmp_t *abitmap);
 extern int fswc_add_image_yuv420p(src_t *src, avgbmp_t *abitmap);
 extern int fswc_add_image_nv12mb(src_t *src, avgbmp_t *abitmap);
 
+extern int fswc_add_image_s561(src_t *src, avgbmp_t *abitmap);
+
 #endif
 

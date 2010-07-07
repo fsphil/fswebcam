@@ -2,6 +2,7 @@
 fswebcam-?
   
   - Enable libgd fontconfig support if avaiable. Default font is now "sans:10".
+  - Add S561 compressed palette support.
 
 fswebcam-20100622
   

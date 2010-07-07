@@ -56,6 +56,7 @@ typedef struct {
 v4l2_palette_t v4l2_palette[] = {
 	{ SRC_PAL_JPEG,    V4L2_PIX_FMT_JPEG   },
 	{ SRC_PAL_MJPEG,   V4L2_PIX_FMT_MJPEG  },
+	{ SRC_PAL_S561,    V4L2_PIX_FMT_SPCA561 },
 	{ SRC_PAL_RGB24,   V4L2_PIX_FMT_RGB24  },
 	{ SRC_PAL_BGR24,   V4L2_PIX_FMT_BGR24  },
 	{ SRC_PAL_RGB32,   V4L2_PIX_FMT_RGB32  },

@@ -49,6 +49,7 @@ src_palette_t src_palette[] = {
 	{ "PNG" },
 	{ "JPEG" },
 	{ "MJPEG" },
+	{ "S561" },
 	{ "RGB32" },
 	{ "BGR32" },
 	{ "RGB24" },

@@ -190,7 +190,7 @@ int parse_font(char *src, char **font, int *fontsize)
 	
 	if(!src || !font || !fontsize) return(-1);
 	
-	p = strchr(src, ':');
+	p = strrchr(src, ':');
 	
 	if(p) l = p - src;
 	else  l = strlen(src);

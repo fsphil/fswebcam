@@ -190,23 +190,25 @@ int parse_font(char *src, char **font, int *fontsize)
 	
 	if(!src || !font || !fontsize) return(-1);
 	
-	p = strrchr(src, ':');
+	l = strlen(src);
 	
-	if(p) l = p - src;
-	else  l = strlen(src);
-	
-	if(l)
+	/* Is the last element a font-size? */
+	if(p = strrchr(src, ':'))
 	{
-		*font = (char *) calloc(l + 1, 1);
-		if(!*font) return(-1);
-		strncpy(*font, src, l);
+		int i = atoi(p + 1);
+		
+		if(i > 0)
+		{
+			*fontsize = i;
+			l = p - src;
+		}
 	}
 	
-	if(p)
-	{
-		p++;
-		if(*p) *fontsize = atoi(p);
-	}
+	/* Copy the font name */
+	if(*font) free(*font);
+	*font = (char *) calloc(l + 1, 1);
+	if(!*font) return(-1);
+	strncpy(*font, src, l);
 	
 	return(0);
 }

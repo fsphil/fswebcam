@@ -172,7 +172,11 @@ void log_msg(char *file, char *function, int line, char l, char *s, ... )
 	if(l == FLOG_DEBUG) o = make_message("%s,%i: %s\n", function, line, msg);
 	else o = make_message("%s\n", msg);
 	
-	if(!o) return;
+	if(!o)
+	{
+		free(msg);
+		return;
+	}
 	
 	/* Use text formatting if logging to stdout. */
 	if(fd_log == STDERR_FILENO && !use_syslog)
@@ -206,5 +210,6 @@ void log_msg(char *file, char *function, int line, char l, char *s, ... )
 	if(fd_log == STDERR_FILENO && !use_syslog) fprintf(stderr, "\033[%im", RESET);
 	
 	free(msg);
+	free(o);
 }
 

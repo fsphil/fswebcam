@@ -63,34 +63,35 @@
 #define OPT_DEINTERLACE     (OPTBASE + 19)
 #define OPT_INVERT          (OPTBASE + 20)
 #define OPT_GREYSCALE       (OPTBASE + 21)
-#define OPT_NO_BANNER       (OPTBASE + 22)
-#define OPT_TOP_BANNER      (OPTBASE + 23)
-#define OPT_BOTTOM_BANNER   (OPTBASE + 24)
-#define OPT_BG_COLOUR       (OPTBASE + 25)
-#define OPT_BL_COLOUR       (OPTBASE + 26)
-#define OPT_FG_COLOUR       (OPTBASE + 27)
-#define OPT_FONT            (OPTBASE + 28)
-#define OPT_NO_SHADOW       (OPTBASE + 29)
-#define OPT_SHADOW          (OPTBASE + 30)
-#define OPT_TITLE           (OPTBASE + 31)
-#define OPT_NO_TITLE        (OPTBASE + 32)
-#define OPT_SUBTITLE        (OPTBASE + 33)
-#define OPT_NO_SUBTITLE     (OPTBASE + 34)
-#define OPT_TIMESTAMP       (OPTBASE + 35)
-#define OPT_NO_TIMESTAMP    (OPTBASE + 36)
-#define OPT_GMT             (OPTBASE + 37)
-#define OPT_INFO            (OPTBASE + 38)
-#define OPT_NO_INFO         (OPTBASE + 39)
-#define OPT_UNDERLAY        (OPTBASE + 40)
-#define OPT_NO_UNDERLAY     (OPTBASE + 41)
-#define OPT_OVERLAY         (OPTBASE + 42)
-#define OPT_NO_OVERLAY      (OPTBASE + 43)
-#define OPT_JPEG            (OPTBASE + 44)
-#define OPT_PNG             (OPTBASE + 45)
-#define OPT_SAVE            (OPTBASE + 46)
-#define OPT_EXEC            (OPTBASE + 47)
-#define OPT_DUMPFRAME       (OPTBASE + 48)
-#define OPT_FPS             (OPTBASE + 49)
+#define OPT_SWAPCHANNELS    (OPTBASE + 22)
+#define OPT_NO_BANNER       (OPTBASE + 23)
+#define OPT_TOP_BANNER      (OPTBASE + 24)
+#define OPT_BOTTOM_BANNER   (OPTBASE + 25)
+#define OPT_BG_COLOUR       (OPTBASE + 26)
+#define OPT_BL_COLOUR       (OPTBASE + 27)
+#define OPT_FG_COLOUR       (OPTBASE + 28)
+#define OPT_FONT            (OPTBASE + 29)
+#define OPT_NO_SHADOW       (OPTBASE + 30)
+#define OPT_SHADOW          (OPTBASE + 31)
+#define OPT_TITLE           (OPTBASE + 32)
+#define OPT_NO_TITLE        (OPTBASE + 33)
+#define OPT_SUBTITLE        (OPTBASE + 34)
+#define OPT_NO_SUBTITLE     (OPTBASE + 35)
+#define OPT_TIMESTAMP       (OPTBASE + 36)
+#define OPT_NO_TIMESTAMP    (OPTBASE + 37)
+#define OPT_GMT             (OPTBASE + 38)
+#define OPT_INFO            (OPTBASE + 39)
+#define OPT_NO_INFO         (OPTBASE + 40)
+#define OPT_UNDERLAY        (OPTBASE + 41)
+#define OPT_NO_UNDERLAY     (OPTBASE + 42)
+#define OPT_OVERLAY         (OPTBASE + 43)
+#define OPT_NO_OVERLAY      (OPTBASE + 44)
+#define OPT_JPEG            (OPTBASE + 45)
+#define OPT_PNG             (OPTBASE + 46)
+#define OPT_SAVE            (OPTBASE + 47)
+#define OPT_EXEC            (OPTBASE + 48)
+#define OPT_DUMPFRAME       (OPTBASE + 49)
+#define OPT_FPS             (OPTBASE + 50)
 
 typedef struct {
 	
@@ -804,6 +805,10 @@ int fswc_grab(fswebcam_config_t *config)
 			modified = 1;
 			image = fx_greyscale(image, options);
 			break;
+		case OPT_SWAPCHANNELS:
+			modified = 1;
+			image = fx_swapchannels(image, options);
+			break;
 		case OPT_NO_BANNER:
 			modified = 1;
 			MSG("Disabling banner.");
@@ -1095,6 +1100,7 @@ int fswc_usage()
 	       "     --deinterlace            Reduces interlace artifacts.\n"
 	       "     --invert                 Inverts the images colours.\n"
 	       "     --greyscale              Removes colour from the image.\n"
+	       "     --swapchannels <c1c2>    Swap channels c1 and c2.\n"
 	       "     --no-banner              Hides the banner.\n"
 	       "     --top-banner             Puts the banner at the top.\n"
 	       "     --bottom-banner          Puts the banner at the bottom. (Default)\n"
@@ -1337,6 +1343,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"deinterlace",     no_argument,       0, OPT_DEINTERLACE},
 		{"invert",          no_argument,       0, OPT_INVERT},
 		{"greyscale",       no_argument,       0, OPT_GREYSCALE},
+		{"swapchannels",    required_argument, 0, OPT_SWAPCHANNELS},
 		{"no-banner",       no_argument,       0, OPT_NO_BANNER},
 		{"top-banner",      no_argument,       0, OPT_TOP_BANNER},
 		{"bottom-banner",   no_argument,       0, OPT_BOTTOM_BANNER},

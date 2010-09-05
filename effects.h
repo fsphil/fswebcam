@@ -18,6 +18,7 @@ extern gdImage *fx_deinterlace(gdImage *src, char *options);
 extern gdImage *fx_invert(gdImage *src, char *options);
 extern gdImage *fx_blur(gdImage *src, char *options);
 extern gdImage *fx_greyscale(gdImage *src, char *options);
+extern gdImage *fx_swapchannels(gdImage *src, char *options);
 
 #endif
 

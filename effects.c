@@ -13,6 +13,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <gd.h>
 #include "parse.h"
 #include "log.h"
@@ -330,6 +331,50 @@ gdImage *fx_greyscale(gdImage *src, char *options)
 		{
 			uint8_t c = GREY(gdImageGetPixel(src, x, y));
 			gdImageSetPixel(src, x, y, RGB(c, c, c));
+		}
+	
+	return(src);
+}
+
+gdImage *fx_swapchannels(gdImage *src, char *options)
+{
+	int mode;
+	int x, y;
+	
+	if(strlen(options) != 2)
+	{
+		WARN("You can only swap two channels: %s", options);
+		return(src);
+	}
+	
+	for(mode = 0, x = 0; x < 2; x++)
+	{
+		char c = toupper(options[x]);
+		if(c == 'R') mode += 0;
+		else if(c == 'G') mode += 1;
+		else if(c == 'B') mode += 2;
+		else mode += 4;
+	}
+	
+	if(mode < 1 || mode > 3)
+	{
+		WARN("Cannot swap colour channels '%s'", options);
+		return(src);
+	}
+	
+	MSG("Swapping colour channels %c <> %c",
+		toupper(options[0]), toupper(options[1]));
+	
+	for(y = 0; y < gdImageSY(src); y++)
+		for(x = 0; x < gdImageSX(src); x++)
+		{
+			int c = gdImageGetPixel(src, x, y);
+			
+			if(mode == 1) c = RGB(G(c), R(c), B(c));
+			else if(mode == 2) c = RGB(B(c), G(c), R(c));
+			else if(mode == 3) c = RGB(R(c), B(c), G(c));
+			
+			gdImageSetPixel(src, x, y, c);
 		}
 	
 	return(src);

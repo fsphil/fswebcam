@@ -1,7 +1,7 @@
 
 fswebcam-20101118
   
-  - Enable libgd fontconfig support if avaiable. Default font is now "sans:10".
+  - Enable libgd fontconfig support if available. Default font is now "sans:10".
   - Add S561 compressed palette support.
   - Fix small memory leak in the logging system.
   - Add option to swap colour channels in the image.

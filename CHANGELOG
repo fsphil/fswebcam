@@ -1,5 +1,5 @@
 
-fswebcam-2010?
+fswebcam-20101118
   
   - Enable libgd fontconfig support if avaiable. Default font is now "sans:10".
   - Add S561 compressed palette support.

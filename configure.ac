@@ -1,5 +1,5 @@
 
-AC_INIT(fswebcam, 20100622, phil@sanslogic.co.uk)
+AC_INIT(fswebcam, 20101118, phil@sanslogic.co.uk)
 AC_PROG_CC
 
 AC_ARG_ENABLE(32bit-buffer,

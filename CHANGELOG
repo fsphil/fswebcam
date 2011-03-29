@@ -1,4 +1,9 @@
 
+fswebcam-2011xxxx
+  
+  - Cleaned up a few small compiler warnings.
+  - Fix pointer type in src_v4l2_set_fps() (hauptmech)
+
 fswebcam-20101118
   
   - Enable libgd fontconfig support if available. Default font is now "sans:10".

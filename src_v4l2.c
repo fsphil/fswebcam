@@ -646,7 +646,7 @@ int src_v4l2_set_fps(src_t *src)
 	setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	setfps.parm.capture.timeperframe.numerator = 1;
 	setfps.parm.capture.timeperframe.denominator = src->fps;
-	if(ioctl(s->fd, VIDIOC_S_PARM, setfps) == -1)
+	if(ioctl(s->fd, VIDIOC_S_PARM, &setfps) == -1)
 	{
 		/* Not fatal - just warn about it */
 		WARN("Error setting frame rate:");

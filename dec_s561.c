@@ -19,6 +19,7 @@
 #include "fswebcam.h"
 #include "src.h"
 #include "log.h"
+#include "dec.h"
 
 /*fixme: not reentrant */
 static unsigned int bit_bucket;

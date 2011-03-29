@@ -193,7 +193,7 @@ int parse_font(char *src, char **font, int *fontsize)
 	l = strlen(src);
 	
 	/* Is the last element a font-size? */
-	if(p = strrchr(src, ':'))
+	if((p = strrchr(src, ':')))
 	{
 		int i = atoi(p + 1);
 		

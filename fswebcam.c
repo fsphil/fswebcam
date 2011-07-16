@@ -623,8 +623,7 @@ int fswc_grab(fswebcam_config_t *config)
 			if(!f) ERROR("fopen: %s", strerror(errno));
 			else
 			{
-				size_t l;
-				l = fwrite(src.img, 1, src.length, f);
+				fwrite(src.img, 1, src.length, f);
 				fclose(f);
 			}
 		}

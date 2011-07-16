@@ -81,7 +81,7 @@ int fswc_add_image_yuyv(src_t *src, avgbmp_t *abitmap)
 int fswc_add_image_yuv420p(src_t *src, avgbmp_t *abitmap)
 {
 	uint8_t *yptr, *uptr, *vptr;
-	uint32_t x, y, p, o;
+	uint32_t x, y, p;
 	
 	if(src->length < (src->width * src->height * 3) / 2) return(-1);
 	
@@ -89,7 +89,6 @@ int fswc_add_image_yuv420p(src_t *src, avgbmp_t *abitmap)
 	yptr = (uint8_t *) src->img;
 	uptr = yptr + (src->width * src->height);
 	vptr = uptr + (src->width * src->height / 4);
-	o = 0;
 	p = 0;
 	
 	for(y = 0; y < src->height; y++)

@@ -224,11 +224,15 @@ char *fswc_strftime(char *dst, size_t max, char *src,
 {
 	struct tm tm_timestamp;
 	
+	/* Clear target string, and verify source is set */
+	*dst = '\0';
+	if(!src) return(dst);
+	
 	/* Set the time structure. */
 	if(gmt) gmtime_r(&timestamp, &tm_timestamp);
 	else localtime_r(&timestamp, &tm_timestamp);
 	
-	*dst = '\0';
+	/* Create the string */
 	strftime(dst, max, src, &tm_timestamp);
 	
 	return(dst);

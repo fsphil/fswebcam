@@ -1,6 +1,7 @@
 
 fswebcam-2011xxxx
   
+  - Fixed crash when using --no-timestamp option.
   - Cleaned up a few small compiler warnings.
   - Fix pointer type in src_v4l2_set_fps() (hauptmech)
 

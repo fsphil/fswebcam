@@ -1,5 +1,5 @@
 
-fswebcam-2011xxxx
+fswebcam-20110717
   
   - Fixed crash when using --no-timestamp option.
   - Cleaned up a few small compiler warnings.

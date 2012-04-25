@@ -1094,7 +1094,7 @@ int fswc_usage()
 	       "     --fps <framerate>        Sets the capture frame rate.\n"
 	       " -F, --frames <number>        Sets the number of frames to capture.\n"
 	       " -S, --skip <number>          Sets the number of frames to skip.\n"
-	       "     --dumpframe <filename>   Dump a raw frame frame to file.\n"
+	       "     --dumpframe <filename>   Dump a raw frame to file.\n"
 	       " -s, --set <name>=<value>     Sets a control value.\n"
 	       "     --revert                 Restores original captured image.\n"
 	       "     --flip <direction>       Flips the image. (h, v)\n"

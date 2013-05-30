@@ -721,6 +721,7 @@ int src_v4l2_set_mmap(src_t *src)
 			ERROR("Error querying buffer %i", b);
 			ERROR("VIDIOC_QUERYBUF: %s", strerror(errno));
 			free(s->buffer);
+			s->buffer = NULL;
 			return(-1);
 		}
 		
@@ -735,6 +736,7 @@ int src_v4l2_set_mmap(src_t *src)
 			s->req.count = b;
 			src_v4l2_free_mmap(src);
 			free(s->buffer);
+			s->buffer = NULL;
 			return(-1);
 		}
 		
@@ -756,6 +758,7 @@ int src_v4l2_set_mmap(src_t *src)
 			ERROR("VIDIOC_QBUF: %s", strerror(errno));
 			src_v4l2_free_mmap(src);
 			free(s->buffer);
+			s->buffer = NULL;
 			return(-1);
 		}
 	}
@@ -768,6 +771,7 @@ int src_v4l2_set_mmap(src_t *src)
 		ERROR("VIDIOC_STREAMON: %s", strerror(errno));
 		src_v4l2_free_mmap(src);
 		free(s->buffer);
+		s->buffer = NULL;
 		return(-1);
 	}
 	

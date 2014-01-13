@@ -491,43 +491,22 @@ int src_v4l2_set_controls(src_t *src)
 		HEAD("%-25s %-15s %s", "Available Controls", "Current Value", "Range");
 		MSG("%-25s %-15s %s",  "------------------", "-------------", "-----");
 		
-		/* Display normal controls. */
-		for(c = V4L2_CID_BASE; c < V4L2_CID_LASTP1; c++)
+		/* Display all controls */
+		queryctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
+		while (0 == ioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl))
 		{
-			queryctrl.id = c;
-			
-			if(ioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl)) continue;
 			src_v4l2_show_control(src, &queryctrl);
-		}
-		
-		/* Display device-specific controls. */
-		for(c = V4L2_CID_PRIVATE_BASE; ; c++)
-		{
-			queryctrl.id = c;
-			
-			if(ioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl)) break;
-			src_v4l2_show_control(src, &queryctrl);
+			queryctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
 		}
 	}
 	
-	/* Scan normal controls. */
-	for(c = V4L2_CID_BASE; c < V4L2_CID_LASTP1; c++)
+	/* Set all controls */
+	queryctrl.id = V4L2_CTRL_FLAG_NEXT_CTRL;
+	while (0 == ioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl))
 	{
-		queryctrl.id = c;
-		
-		if(ioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl)) continue;
 		src_v4l2_set_control(src, &queryctrl);
+		queryctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
 	}
-	
-	/* Scan device-specific controls. */
-	for(c = V4L2_CID_PRIVATE_BASE; ; c++)
-	{
-		queryctrl.id = c;
-		
-		if(ioctl(s->fd, VIDIOC_QUERYCTRL, &queryctrl)) break;
-		src_v4l2_set_control(src, &queryctrl);
-	}
-	
 	return(0);
 }
 

@@ -1,4 +1,10 @@
 
+fswebcam-20140113
+  
+  - New method of iterating over all V4L2 controls for a device. (Tom Bürgel)
+  - Fix: double free when both mmap and read fail. (Shayan Elhami)
+  - Remove duplicate 'frame' in help text. (Grozdan)
+
 fswebcam-20110717
   
   - Fixed crash when using --no-timestamp option.

@@ -38,5 +38,5 @@ clean:
 	rm -f core* *.o fswebcam fswebcam.1.gz
 
 distclean: clean
-	rm -rf config.h *.cache config.log config.status Makefile *.jp*g *.png
+	rm -rf config.h *.cache config.log config.status Makefile *.jp*g *.png *~
 

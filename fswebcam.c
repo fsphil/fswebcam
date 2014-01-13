@@ -1,6 +1,6 @@
 /* fswebcam - Small and simple webcam for *nix                */
 /*============================================================*/
-/* Copyright (C)2005-2011 Philip Heron <phil@sanslogic.co.uk> */
+/* Copyright (C)2005-2014 Philip Heron <phil@sanslogic.co.uk> */
 /*                                                            */
 /* This program is distributed under the terms of the GNU     */
 /* General Public License, version 2. You may use, modify,    */

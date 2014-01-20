@@ -10,7 +10,7 @@ mandir      = @mandir@
 datarootdir = @datarootdir@
 
 CC      = @CC@
-CFLAGS  = @CFLAGS@ @DEFS@
+CFLAGS  = @CPPFLAGS@ @CFLAGS@ @DEFS@
 LDFLAGS = @LDFLAGS@
 
 OBJS  = fswebcam.o log.o effects.o parse.o src.o @SRC_OBJS@

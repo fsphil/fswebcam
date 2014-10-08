@@ -1138,7 +1138,7 @@ int fswc_usage()
 	       "     --overlay <PNG image>    Sets the overlay image.\n"
 	       "     --no-overlay             Clears the overlay.\n"
 	       "     --jpeg <factor>          Outputs a JPEG image. (-1, 0 - 95)\n"
-	       "     --png <factor>           Outputs a PNG image. (-1, 0 - 10)\n"
+	       "     --png <factor>           Outputs a PNG image. (-1, 0 - 9)\n"
 	       "     --save <filename>        Save image to file.\n"
 	       "     --exec <command>         Execute a command and wait for it to complete.\n"
 	       "\n");

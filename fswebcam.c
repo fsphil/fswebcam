@@ -138,8 +138,8 @@ typedef struct {
 	uint8_t list;
 	
 	/* Image capture options. */
-	unsigned int width;
-	unsigned int height;
+	int width;
+	int height;
 	unsigned int frames;
 	unsigned int fps;
 	unsigned int skipframes;

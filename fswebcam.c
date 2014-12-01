@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
+#include <locale.h>
 #include <gd.h>
 #include <errno.h>
 #include <signal.h>
@@ -1591,6 +1592,9 @@ int fswc_free_config(fswebcam_config_t *config)
 int main(int argc, char *argv[])
 {
 	fswebcam_config_t *config;
+	
+	/* Set the locale to the system default */
+	setlocale(LC_ALL, "");
 	
 	/* Prepare the configuration structure. */
 	config = calloc(sizeof(fswebcam_config_t), 1);

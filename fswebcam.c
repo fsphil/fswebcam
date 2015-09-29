@@ -620,12 +620,38 @@ int fswc_grab(fswebcam_config_t *config)
 			
 			MSG("Dumping raw frame to '%s'...", config->dumpframe);
 			
-			f = fopen(config->dumpframe, "wb");
+			if(!strncmp(config->dumpframe, "-", 2) && config->background)
+			{
+				ERROR("stdout is unavailable in background mode.");
+				return(-1);
+			}
+			
+			/* Write to a file if a filename was given, otherwise stdout. */
+			if(strncmp(config->dumpframe, "-", 2)) f = fopen(config->dumpframe, "wb");
+			else f = stdout;
 			if(!f) ERROR("fopen: %s", strerror(errno));
 			else
 			{
-				fwrite(src.img, 1, src.length, f);
-				fclose(f);
+				/* return when no file will be saved */
+				if(f == stdout)
+				{
+					char *filename = NULL;
+					for(x = 0; x < config->jobs; x++)
+					{
+						if(config->job[x]->id == 1 || config->job[x]->id == OPT_SAVE)
+						{
+							filename = config->job[x]->options;
+							break;
+						}
+					}
+					if(!filename) return(0);
+					if(!strncmp(filename, "-", 2))
+					{
+						ERROR("stdout can't be used for dumpframe and save.");
+						return(-1);
+					}
+				}
+				else fclose(f);
 			}
 		}
 		

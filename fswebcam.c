@@ -1087,7 +1087,6 @@ int fswc_usage()
 	       " -b, --background             Run in the background.\n"
 	       "     --pid <filename>         Saves background process PID to filename.\n"
 	       " -L, --log [file/syslog:]<filename> Redirect log messages to a file or syslog.\n"
-	       " -o, --output <filename>      Output the log to a file.\n"
 	       " -d, --device <name>          Sets the source to use.\n"
 	       " -i, --input <number/name>    Selects the input to use.\n"
 	       "     --list-inputs            Displays available inputs.\n"

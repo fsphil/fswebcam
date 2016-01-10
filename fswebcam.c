@@ -135,6 +135,7 @@ typedef struct {
 	unsigned char tuner;
 	unsigned long frequency;
 	unsigned long delay;
+	unsigned long timeout;
 	char use_read;
 	uint8_t list;
 	
@@ -569,7 +570,7 @@ int fswc_grab(fswebcam_config_t *config)
 	src.tuner      = config->tuner;
 	src.frequency  = config->frequency;
 	src.delay      = config->delay;
-	src.timeout    = 10; /* seconds */
+	src.timeout    = config->timeout; 
 	src.use_read   = config->use_read;
 	src.list       = config->list;
 	src.palette    = config->palette;
@@ -1100,6 +1101,7 @@ int fswc_usage()
 	       "     --list-framesizes        Displays the available frame sizes.\n"
 	       "     --list-framerates        Displays the available frame rates.\n"
 	       " -F, --frames <number>        Sets the number of frames to capture.\n"
+	       " -T, --timeout <seconds>      Sets the timeout for frame capture.\n"
 	       " -S, --skip <number>          Sets the number of frames to skip.\n"
 	       "     --dumpframe <filename>   Dump a raw frame to file.\n"
 	       " -R, --read                   Use read() to capture images.\n"
@@ -1337,6 +1339,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"list-tuners",     no_argument,       0, OPT_LIST_TUNERS},
 		{"frequency",       required_argument, 0, 'f'},
 		{"delay",           required_argument, 0, 'D'},
+		{"timeout",         required_argument, 0, 'T'},
 		{"resolution",      required_argument, 0, 'r'},
 		{"fps",	            required_argument, 0, OPT_FPS},
 		{"list-framesizes", no_argument,       0, OPT_LIST_FRAMESIZES},
@@ -1408,6 +1411,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	config->tuner = 0;
 	config->frequency = 0;
 	config->delay = 0;
+	config->timeout = 10;
 	config->use_read = 0;
 	config->list = 0;
 	config->width = 384;
@@ -1496,6 +1500,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 			break;
 		case 'D':
 			config->delay = atoi(optarg);
+			break;
+		case 'T':
+			config->timeout = atoi(optarg);
 			break;
 		case 'r':
 	 		config->width  = argtol(optarg, "x ", 0, 0, 10);

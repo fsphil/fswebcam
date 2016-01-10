@@ -191,6 +191,12 @@ Default is "0".
 Inserts a delay after the source or device has been opened and initialised, and before the capture begins. Some devices need this delay to let the image settle after a setting has changed. The delay time is specified in seconds.
 
 .TP
+\fB\-T\fR, \fB\-\-timeout\fR \fI<seconds>\fR
+Adjusts the timeout period in seconds for frame capture. This should be increased for exposures longer than 10 seconds.
+.IP
+Default is "10".
+
+.TP
 \fB\-R\fR, \fB\-\-read\fR
 Use read() to capture images. This can be slower but more stable with some devices.
 .IP

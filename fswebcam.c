@@ -1389,7 +1389,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"exec",            required_argument, 0, OPT_EXEC},
 		{0, 0, 0, 0}
 	};
-	char *opts = "-qc:vl:bL:d:i:t:f:D:r:F:s:S:p:R";
+	char *opts = "-qc:vl:bL:d:i:t:f:D:T:r:F:s:S:p:R";
 	
 	s.opts      = opts;
 	s.long_opts = long_opts;

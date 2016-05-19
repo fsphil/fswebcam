@@ -44,6 +44,7 @@
 enum fswc_options {
 	OPT_VERSION = 128,
 	OPT_PID,
+	OPT_KEEP_OPEN,
 	OPT_OFFSET,
 	OPT_LIST_INPUTS,
 	OPT_LIST_TUNERS,
@@ -65,6 +66,7 @@ enum fswc_options {
 	OPT_INVERT,
 	OPT_GREYSCALE,
 	OPT_SWAPCHANNELS,
+	OPT_IN_PLACE,
 	OPT_NO_BANNER,
 	OPT_TOP_BANNER,
 	OPT_BOTTOM_BANNER,
@@ -91,6 +93,7 @@ enum fswc_options {
 	OPT_PNG,
 	OPT_SAVE,
 	OPT_EXEC,
+	OPT_LOOP_EXEC,
 	OPT_DUMPFRAME,
 	OPT_FPS,
 };
@@ -118,6 +121,9 @@ typedef struct {
 
 typedef struct {
 	
+	/* Source */
+	src_t *src;
+
 	/* General options. */
 	unsigned long loop;
 	signed long offset;
@@ -137,6 +143,7 @@ typedef struct {
 	unsigned long delay;
 	unsigned long timeout;
 	char use_read;
+	char keep_open;
 	uint8_t list;
 	
 	/* Image capture options. */
@@ -152,7 +159,10 @@ typedef struct {
 	/* Job queue. */
 	uint8_t jobs;
 	fswebcam_job_t **job;
+	char *loopExec;
 	
+	/* Transformation options. */
+	char inplace;
 	/* Banner options. */
 	char banner;
 	uint32_t bg_colour;
@@ -453,7 +463,10 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 	              config->start, config->gmt);
 	
 	/* Create a temporary image buffer. */
-	im = fswc_gdImageDuplicate(image);
+	if(!config->inplace)
+		im = fswc_gdImageDuplicate(image);
+	else
+		im = image;
 	if(!im)
 	{
 		ERROR("Out of memory.");
@@ -491,7 +504,7 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 	{
 		ERROR("Error opening file for output: %s", filename);
 		ERROR("fopen: %s", strerror(errno));
-		gdImageDestroy(im);
+		if(!config->inplace) gdImageDestroy(im);
 		return(-1);
 	}
 	
@@ -510,7 +523,7 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 	
 	if(f != stdout) fclose(f);
 	
-	gdImageDestroy(im);
+	if(!config->inplace) gdImageDestroy(im);
 	
 	return(0);
 }
@@ -559,34 +572,44 @@ int fswc_grab(fswebcam_config_t *config)
 	avgbmp_t *abitmap, *pbitmap;
 	gdImage *image, *original;
 	uint8_t modified;
-	src_t src;
 	
 	/* Record the start time. */
 	config->start = time(NULL);
 	
 	/* Set source options... */
-	memset(&src, 0, sizeof(src));
-	src.input      = config->input;
-	src.tuner      = config->tuner;
-	src.frequency  = config->frequency;
-	src.delay      = config->delay;
-	src.timeout    = config->timeout; 
-	src.use_read   = config->use_read;
-	src.list       = config->list;
-	src.palette    = config->palette;
-	src.width      = config->width;
-	src.height     = config->height;
-	src.fps        = config->fps;
-	src.option     = config->option;
+	if(config->src == NULL) {
+		config->src = calloc(sizeof(src_t), 1);
+		if(!config->src) {
+			WARN("Out of memory.");
+			return(-1);
+		}
+		config->src->input      = config->input;
+		config->src->tuner      = config->tuner;
+		config->src->frequency  = config->frequency;
+		config->src->delay      = config->delay;
+		config->src->timeout    = config->timeout;
+		config->src->use_read   = config->use_read;
+		config->src->list       = config->list;
+		config->src->palette    = config->palette;
+		config->src->width      = config->width;
+		config->src->height     = config->height;
+		config->src->fps        = config->fps;
+		config->src->option     = config->option;
+
+		HEAD("--- Opening %s...", config->device);
 	
-	HEAD("--- Opening %s...", config->device);
-	
-	if(src_open(&src, config->device) == -1) return(-1);
+		if(src_open(config->src, config->device) == -1)
+		{
+			free(config->src);
+			config->src = NULL;
+			return(-1);
+		}
+	}
 	
 	/* The source may have adjusted the width and height we passed
 	 * to it. Update the main config to match. */
-	config->width  = src.width;
-	config->height = src.height;
+	config->width  = config->src->width;
+	config->height = config->src->height;
 	
 	/* Allocate memory for the average bitmap buffer. */
 	abitmap = calloc(config->width * config->height * 3, sizeof(avgbmp_t));
@@ -604,7 +627,7 @@ int fswc_grab(fswebcam_config_t *config)
 	
 	/* Grab (and do nothing with) the skipped frames. */
 	for(frame = 0; frame < config->skipframes; frame++)
-		if(src_grab(&src) == -1) break;
+		if(src_grab(config->src) == -1) break;
 	
 	/* If frames where skipped, inform when normal capture begins. */
 	if(config->skipframes) MSG("Capturing %i frames...", config->frames);
@@ -612,7 +635,7 @@ int fswc_grab(fswebcam_config_t *config)
 	/* Grab the requested number of frames. */
 	for(frame = 0; frame < config->frames; frame++)
 	{
-		if(src_grab(&src) == -1) break;
+		if(src_grab(config->src) == -1) break;
 		
 		if(!frame && config->dumpframe)
 		{
@@ -625,68 +648,74 @@ int fswc_grab(fswebcam_config_t *config)
 			if(!f) ERROR("fopen: %s", strerror(errno));
 			else
 			{
-				fwrite(src.img, 1, src.length, f);
+				fwrite(config->src->img, 1, config->src->length, f);
 				fclose(f);
 			}
 		}
 		
 		/* Add frame to the average bitmap. */
-		switch(src.palette)
+		switch(config->src->palette)
 		{
 		case SRC_PAL_PNG:
-			fswc_add_image_png(&src, abitmap);
+			fswc_add_image_png(config->src, abitmap);
 			break;
 		case SRC_PAL_JPEG:
 		case SRC_PAL_MJPEG:
-			fswc_add_image_jpeg(&src, abitmap);
+			fswc_add_image_jpeg(config->src, abitmap);
 			break;
 		case SRC_PAL_S561:
-			fswc_add_image_s561(abitmap, src.img, src.length, src.width, src.height, src.palette);
+			fswc_add_image_s561(abitmap, config->src->img, config->src->length, config->src->width, config->src->height, config->src->palette);
 			break;
 		case SRC_PAL_RGB32:
-			fswc_add_image_rgb32(&src, abitmap);
+			fswc_add_image_rgb32(config->src, abitmap);
 			break;
 		case SRC_PAL_BGR32:
-			fswc_add_image_bgr32(&src, abitmap);
+			fswc_add_image_bgr32(config->src, abitmap);
 			break;
 		case SRC_PAL_RGB24:
-			fswc_add_image_rgb24(&src, abitmap);
+			fswc_add_image_rgb24(config->src, abitmap);
 			break;
 		case SRC_PAL_BGR24:
-			fswc_add_image_bgr24(&src, abitmap);
+			fswc_add_image_bgr24(config->src, abitmap);
 			break;
 		case SRC_PAL_BAYER:
 		case SRC_PAL_SGBRG8:
 		case SRC_PAL_SGRBG8:
-			fswc_add_image_bayer(abitmap, src.img, src.length, src.width, src.height, src.palette);
+			fswc_add_image_bayer(abitmap, config->src->img, config->src->length, config->src->width, config->src->height, config->src->palette);
 			break;
 		case SRC_PAL_YUYV:
 		case SRC_PAL_UYVY:
-			fswc_add_image_yuyv(&src, abitmap);
+			fswc_add_image_yuyv(config->src, abitmap);
 			break;
 		case SRC_PAL_YUV420P:
-			fswc_add_image_yuv420p(&src, abitmap);
+			fswc_add_image_yuv420p(config->src, abitmap);
 			break;
 		case SRC_PAL_NV12MB:
-			fswc_add_image_nv12mb(&src, abitmap);
+			fswc_add_image_nv12mb(config->src, abitmap);
 			break;
 		case SRC_PAL_RGB565:
-			fswc_add_image_rgb565(&src, abitmap);
+			fswc_add_image_rgb565(config->src, abitmap);
 			break;
 		case SRC_PAL_RGB555:
-			fswc_add_image_rgb555(&src, abitmap);
+			fswc_add_image_rgb555(config->src, abitmap);
 			break;
 		case SRC_PAL_Y16:
-			fswc_add_image_y16(&src, abitmap);
+			fswc_add_image_y16(config->src, abitmap);
 			break;
 		case SRC_PAL_GREY:
-			fswc_add_image_grey(&src, abitmap);
+			fswc_add_image_grey(config->src, abitmap);
 			break;
 		}
 	}
 	
 	/* We are now finished with the capture card. */
-	src_close(&src);
+	if(!config->keep_open)
+	{
+		HEAD("--- Closing %s...", config->device);
+		src_close(config->src);
+		free(config->src);
+		config->src = NULL;
+	}
 	
 	/* Fail if no frames where captured. */
 	if(!frame)
@@ -694,6 +723,12 @@ int fswc_grab(fswebcam_config_t *config)
 		ERROR("No frames captured.");
 		free(abitmap);
 		return(-1);
+	}
+
+	if(!config->jobs)
+	{
+		free(abitmap);
+		return(0);
 	}
 	
 	HEAD("--- Processing captured image...");
@@ -725,7 +760,10 @@ int fswc_grab(fswebcam_config_t *config)
 	free(abitmap);
 	
 	/* Make a copy of the original image. */
-	image = fswc_gdImageDuplicate(original);
+	if(!config->inplace)
+		image = fswc_gdImageDuplicate(original);
+	else
+		image = original;
 	if(!image)
 	{
 		ERROR("Out of memory.");
@@ -951,7 +989,8 @@ int fswc_grab(fswebcam_config_t *config)
 		}
 	}
 	
-	gdImageDestroy(image);
+	if(!config->inplace)
+		gdImageDestroy(image);
 	gdImageDestroy(original);
 	
 	if(modified) WARN("There are unsaved changes to the image.");
@@ -1089,6 +1128,7 @@ int fswc_usage()
 	       "     --pid <filename>         Saves background process PID to filename.\n"
 	       " -L, --log [file/syslog:]<filename> Redirect log messages to a file or syslog.\n"
 	       " -d, --device <name>          Sets the source to use.\n"
+	       "     --keep-open              Keep source device open. Useful in loop mode.\n"
 	       " -i, --input <number/name>    Selects the input to use.\n"
 	       "     --list-inputs            Displays available inputs.\n"
 	       " -t, --tuner <number>         Selects the tuner to use.\n"
@@ -1117,6 +1157,7 @@ int fswc_usage()
 	       "     --invert                 Inverts the images colours.\n"
 	       "     --greyscale              Removes colour from the image.\n"
 	       "     --swapchannels <c1c2>    Swap channels c1 and c2.\n"
+	       "     --in-place               Do all transformation on original image. Faster performance\n"
 	       "     --no-banner              Hides the banner.\n"
 	       "     --top-banner             Puts the banner at the top.\n"
 	       "     --bottom-banner          Puts the banner at the bottom. (Default)\n"
@@ -1143,6 +1184,7 @@ int fswc_usage()
 	       "     --png <factor>           Outputs a PNG image. (-1, 0 - 9)\n"
 	       "     --save <filename>        Save image to file.\n"
 	       "     --exec <command>         Execute a command and wait for it to complete.\n"
+	       "     --loopexec <command>     Execute a command at end of loop and wait for it to complete.\n"
 	       "\n");
 	
 	return(0);
@@ -1333,6 +1375,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"pid",             required_argument, 0, OPT_PID},
 		{"log",             required_argument, 0, 'L'},
 		{"device",          required_argument, 0, 'd'},
+		{"keep-open",       no_argument,       0, OPT_KEEP_OPEN},
 		{"input",           required_argument, 0, 'i'},
 		{"list-inputs",     no_argument,       0, OPT_LIST_INPUTS},
 		{"tuner",           required_argument, 0, 't'},
@@ -1361,6 +1404,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"invert",          no_argument,       0, OPT_INVERT},
 		{"greyscale",       no_argument,       0, OPT_GREYSCALE},
 		{"swapchannels",    required_argument, 0, OPT_SWAPCHANNELS},
+		{"in-place",        no_argument,       0, OPT_IN_PLACE},
 		{"no-banner",       no_argument,       0, OPT_NO_BANNER},
 		{"top-banner",      no_argument,       0, OPT_TOP_BANNER},
 		{"bottom-banner",   no_argument,       0, OPT_BOTTOM_BANNER},
@@ -1387,6 +1431,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"png",             required_argument, 0, OPT_PNG},
 		{"save",            required_argument, 0, OPT_SAVE},
 		{"exec",            required_argument, 0, OPT_EXEC},
+		{"loopexec",        required_argument, 0, OPT_LOOP_EXEC},
 		{0, 0, 0, 0}
 	};
 	char *opts = "-qc:vl:bL:d:i:t:f:D:T:r:F:s:S:p:R";
@@ -1412,6 +1457,8 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	config->frequency = 0;
 	config->delay = 0;
 	config->timeout = 10;
+	config->keep_open = 0;
+	config->inplace = 0;
 	config->use_read = 0;
 	config->list = 0;
 	config->width = 384;
@@ -1422,6 +1469,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	config->palette = SRC_PAL_ANY;
 	config->option = NULL;
 	config->dumpframe = NULL;
+	config->loopExec = NULL;
 	config->jobs = 0;
 	config->job = NULL;
 	
@@ -1482,6 +1530,12 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 			if(config->device) free(config->device);
 			config->device = strdup(optarg);
 			break;
+		case OPT_KEEP_OPEN:
+			config->keep_open = 1;
+			break;
+		case OPT_IN_PLACE:
+			config->inplace = 1;
+			break;
 		case 'i':
 			if(config->input) free(config->input);
 			config->input = strdup(optarg);
@@ -1540,6 +1594,10 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 			free(config->dumpframe);
 			config->dumpframe = strdup(optarg);
 			break;
+		case OPT_LOOP_EXEC:
+			free(config->loopExec);
+			config->loopExec = strdup(optarg);
+			break;
 		default:
 			/* All other options are added to the job queue. */
 			fswc_add_job(config, c, optarg);
@@ -1572,6 +1630,13 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 
 int fswc_free_config(fswebcam_config_t *config)
 {
+	if(config->src)
+	{
+		HEAD("--- Closing %s...", config->device);
+		src_close(config->src);
+		free(config->src);
+	}
+
 	free(config->pidfile);
 	free(config->logfile);
 	free(config->device);
@@ -1586,6 +1651,7 @@ int fswc_free_config(fswebcam_config_t *config)
 	free(config->underlay);
 	free(config->overlay);
 	free(config->filename);
+	free(config->loopExec);
 	
 	src_free_options(&config->option);
 	fswc_free_jobs(config);
@@ -1687,6 +1753,9 @@ int main(int argc, char *argv[])
 			
 			/* Capture the image. */
 			fswc_grab(config);
+
+			/* Execute loop end job */
+			if(config->loopExec != NULL) fswc_exec(config, config->loopExec);
 		}
 	}
 	

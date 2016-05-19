@@ -947,6 +947,9 @@ static int src_v4l2_grab(src_t *src)
 		
 		src->img    = s->buffer[s->buf.index].start;
 		src->length = s->buffer[s->buf.index].length;
+
+		DEBUG("Grabbed frame: seq %u, timestamp %u, byteused %u, flags %08X",
+			s->buf.sequence, s->buf.timestamp, s->buf.bytesused, s->buf.flags);
 		
 		s->pframe = s->buf.index;
 	}

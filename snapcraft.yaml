@@ -1,12 +1,15 @@
 name: fswebcam  # the name of the snap
-version: 0  # the version of the snap
+version: 1  # the version of the snap
 summary: Snap of fswebcam  # 79 char long summary
 description: Snap of fswebcam  # a longer description for the snap
-confinement: devmode  # use "strict" to enforce system access only via declared interfaces
+confinement: strict  # use "strict" to enforce system access only via declared interfaces
 
 apps:
   fswebcam:
     command: fswebcam
+    plugs:
+      - home
+      - camera
 
 parts:
     fswebcam:  # Replace with a part name of your liking

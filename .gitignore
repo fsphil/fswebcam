@@ -17,3 +17,7 @@ config.log
 config.status
 *.cache
 
+/parts/
+/prime/
+/stage/
+*.snap

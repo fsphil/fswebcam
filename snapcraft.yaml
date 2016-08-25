@@ -1,0 +1,27 @@
+name: fswebcam  # the name of the snap
+version: 0  # the version of the snap
+summary: Snap of fswebcam  # 79 char long summary
+description: Snap of fswebcam  # a longer description for the snap
+confinement: devmode  # use "strict" to enforce system access only via declared interfaces
+
+apps:
+  fswebcam:
+    command: fswebcam
+
+parts:
+    fswebcam:  # Replace with a part name of your liking
+        # Get more information about plugins by running
+        # snapcraft help plugins
+        # and more information about the available plugins
+        # by running
+        # snapcraft list-plugins
+        plugin: autotools
+        source: .
+        build-packages:
+          # Here for the plugins-- they're not linked in automatically.
+          - libgd-dev
+          - libgd3
+        stage-packages:
+          # Here for the plugins-- they're not linked in automatically.
+          - libgd3
+        

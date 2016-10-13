@@ -93,6 +93,7 @@ enum fswc_options {
 	OPT_EXEC,
 	OPT_DUMPFRAME,
 	OPT_FPS,
+	OPT_MKDIR,
 };
 
 typedef struct {
@@ -174,6 +175,7 @@ typedef struct {
 	char *filename;
 	char format;
 	char compression;
+	uint8_t mkdir_output_file;
 	
 } fswebcam_config_t;
 
@@ -436,6 +438,47 @@ gdImage* fswc_gdImageDuplicate(gdImage* src)
 	return(dst);
 }
 
+int fswc_create_output_dir(char *filename)
+{
+	/* Step through the filename checking each segment of the path in turn.
+	 * If one does not exist, try creating it.  Return an error or 0 if
+	 * all paths created successfully.  Modifies but repairs filename */
+	int pos;
+	int len = strlen(filename);
+	struct stat st = {0};
+
+	for (pos = 0; pos < len; pos++)
+	{
+		/* Look for a / character that divides the path. */
+		for (pos = 0; pos < len && filename[pos] != '/'; pos++);
+		/* Terminate the string here for now */
+		filename[pos] = '\0';
+		/* Now stat and create if not found */
+		if (stat(filename, &st) == -1)
+		{
+			if (errno == ENOENT) {
+				if (mkdir(filename, 0700) == -1)
+				{
+					if (pos < len)
+					{
+						filename[pos] = '/';
+					}
+					return -1;
+				}
+			}
+			else
+			{
+				if (pos < len)
+				{
+					filename[pos] = '/';
+				}
+				return -1;
+			}
+		}
+	}
+	return 0;
+}
+
 int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 {
 	char filename[FILENAME_MAX];
@@ -476,13 +519,22 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 		{
 			/* Can't load the font - display a warning */
 			WARN("Unable to load font '%s': %s", config->font, err);
-			WARN("Disabling the the banner.");
+			WARN("Disabling the banner.");
 		}
 	}
 	
 	/* Draw the overlay. */
 	fswc_draw_overlay(config, config->overlay, im);
 	
+	/* Do we need to check that the output directory exists? */
+	if (config->mkdir_output_file)
+	{
+		int err = fswc_create_output_dir(filename);
+		if (err < 0) {
+			WARN("Unable to create path to file '%s': %s", filename, strerror(errno));
+		}
+	}
+
 	/* Write to a file if a filename was given, otherwise stdout. */
 	if(strncmp(name, "-", 2)) f = fopen(filename, "wb");
 	else f = stdout;
@@ -1143,6 +1195,7 @@ int fswc_usage()
 	       "     --png <factor>           Outputs a PNG image. (-1, 0 - 9)\n"
 	       "     --save <filename>        Save image to file.\n"
 	       "     --exec <command>         Execute a command and wait for it to complete.\n"
+	       " -m, --mkdir                  Make all the directories in the path\n"
 	       "\n");
 	
 	return(0);
@@ -1387,9 +1440,10 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"png",             required_argument, 0, OPT_PNG},
 		{"save",            required_argument, 0, OPT_SAVE},
 		{"exec",            required_argument, 0, OPT_EXEC},
+		{"mkdir",           no_argument,       0, OPT_MKDIR},
 		{0, 0, 0, 0}
 	};
-	char *opts = "-qc:vl:bL:d:i:t:f:D:T:r:F:s:S:p:R";
+	char *opts = "-qc:vl:bL:d:i:t:f:D:T:r:F:s:S:p:Rm";
 	
 	s.opts      = opts;
 	s.long_opts = long_opts;
@@ -1424,6 +1478,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	config->dumpframe = NULL;
 	config->jobs = 0;
 	config->job = NULL;
+	config->mkdir_output_file = 0;
 	
 	/* Don't report errors. */
 	opterr = 0;
@@ -1529,6 +1584,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 			break;
 		case 'R':
 			config->use_read = -1;
+			break;
+		case 'm':
+			config->mkdir_output_file = 1;
 			break;
 		case OPT_LIST_FORMATS:
 			config->list |= SRC_LIST_FORMATS;

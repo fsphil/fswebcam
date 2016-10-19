@@ -445,36 +445,41 @@ int fswc_create_output_dir(char *filename)
 	 * all paths created successfully.  Modifies but repairs filename */
 	int pos;
 	int len = strlen(filename);
+	int result;
 	struct stat st = {0};
 
-	for (pos = 0; pos < len; pos++)
+	/* We have to start with at least _some_ path, hence pos = 1 */
+	for (pos = 1; pos < len; pos++)
 	{
 		/* Look for a / character that divides the path. */
-		for (pos = 0; pos < len && filename[pos] != '/'; pos++);
+		for (; pos < len && filename[pos] != '/'; pos++);
+		if (pos == len) {
+			/* If we hit the end of the string - and there should not be a
+			 * / there - then break. */
+			break;
+		}
 		/* Terminate the string here for now */
 		filename[pos] = '\0';
 		/* Now stat and create if not found */
-		if (stat(filename, &st) == -1)
+		result = stat(filename, &st);
+		/* Can't put / back until after mkdir */
+		if (result == -1)
 		{
 			if (errno == ENOENT) {
-				if (mkdir(filename, 0700) == -1)
+				result = mkdir(filename, 0700);
+				MSG("Creating path for '%s'", filename);
+				filename[pos] = '/';
+				if (result == -1)
 				{
-					if (pos < len)
-					{
-						filename[pos] = '/';
-					}
 					return -1;
 				}
 			}
 			else
 			{
-				if (pos < len)
-				{
-					filename[pos] = '/';
-				}
 				return -1;
 			}
 		}
+		filename[pos] = '/';
 	}
 	return 0;
 }

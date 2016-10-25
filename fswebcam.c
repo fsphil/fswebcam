@@ -448,14 +448,21 @@ int fswc_create_output_dir(char *filename)
 	int result;
 	struct stat st = {0};
 
+	/* First move the 'length' back to the last slash, since we don't want to
+	 * create a directory with the name of the filename */
+	for (len > 0; filename[len] != '/'; len--);
+	if (len == 0)
+	{
+		return 0;
+	}
 	/* We have to start with at least _some_ path, hence pos = 1 */
 	for (pos = 1; pos < len; pos++)
 	{
 		/* Look for a / character that divides the path. */
-		for (; pos < len && filename[pos] != '/'; pos++);
-		if (pos == len) {
-			/* If we hit the end of the string - and there should not be a
-			 * / there - then break. */
+		for (; pos <= len && filename[pos] != '/'; pos++);
+		if (pos > len) {
+			/* If went past the last directory, then we've got no more path
+			 * to create. */
 			break;
 		}
 		/* Terminate the string here for now */

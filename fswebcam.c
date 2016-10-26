@@ -93,7 +93,6 @@ enum fswc_options {
 	OPT_EXEC,
 	OPT_DUMPFRAME,
 	OPT_FPS,
-	OPT_MKDIR,
 };
 
 typedef struct {
@@ -1452,7 +1451,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"png",             required_argument, 0, OPT_PNG},
 		{"save",            required_argument, 0, OPT_SAVE},
 		{"exec",            required_argument, 0, OPT_EXEC},
-		{"mkdir",           no_argument,       0, OPT_MKDIR},
+		{"mkdir",           no_argument,       0, 'm'},
 		{0, 0, 0, 0}
 	};
 	char *opts = "-qc:vl:bL:d:i:t:f:D:T:r:F:s:S:p:Rm";

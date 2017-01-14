@@ -1598,6 +1598,7 @@ int fswc_free_config(fswebcam_config_t *config)
 int main(int argc, char *argv[])
 {
 	fswebcam_config_t *config;
+	int r;
 	
 	/* Set the locale to the system default */
 	setlocale(LC_ALL, "");
@@ -1629,7 +1630,7 @@ int main(int argc, char *argv[])
 	if(!gdFTUseFontConfig(1)) DEBUG("gd has no fontconfig support");
 	
 	/* Capture the image(s). */
-	if(!config->loop) fswc_grab(config);
+	if(!config->loop) r = fswc_grab(config);
 	else
 	{
 		/* Loop mode ... keep capturing images until terminated. */
@@ -1686,7 +1687,7 @@ int main(int argc, char *argv[])
 			received_sigusr1 = 0;
 			
 			/* Capture the image. */
-			fswc_grab(config);
+			r = fswc_grab(config);
 		}
 	}
 	
@@ -1697,6 +1698,6 @@ int main(int argc, char *argv[])
 	fswc_free_config(config);
 	free(config);
 	
-	return(0);
+	return(r);
 }
 

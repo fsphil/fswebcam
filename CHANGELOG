@@ -1,4 +1,10 @@
 
+fswebcam-xxxxxxxx
+  
+  - Return a non-zero if the capture fails.
+  - Add option to change camera timeout from default of 10 seconds.
+    (James McCormac)
+
 fswebcam-20140113
   
   - New method of iterating over all V4L2 controls for a device. (Tom Bürgel)

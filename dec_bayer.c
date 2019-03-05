@@ -91,8 +91,7 @@ int fswc_add_image_bayer(avgbmp_t *dst, uint8_t *img, uint32_t length, uint32_t 
 		else              { b = *img; g = (vn + hn) / 2; r = di; }
 		
 		if(palette == SRC_PAL_SGRBG8 ||
-		   palette == SRC_PAL_SRGGB8 ||
-		   palette == SRC_PAL_BAYER)
+		   palette == SRC_PAL_SRGGB8)
 		{
 			uint8_t t = r;
 			r = b;

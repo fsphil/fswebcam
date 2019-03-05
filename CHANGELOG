@@ -4,6 +4,9 @@ fswebcam-xxxxxxxx
   - Return a non-zero if the capture fails.
   - Add option to change camera timeout from default of 10 seconds.
     (James McCormac)
+  - Add new Bayer palettes. (Eugen Hristev)
+  - Add WebP output support.
+  - Add option to dump raw frames to stdout. (Philipp Simon Schmidt)
 
 fswebcam-20140113
   

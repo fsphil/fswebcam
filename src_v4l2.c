@@ -338,7 +338,7 @@ int src_v4l2_show_control(src_t *src, struct v4l2_queryctrl *queryctrl)
 			if(!ioctl(s->fd, VIDIOC_QUERYMENU, &querymenu))
 			{
 				strncat(t, (char *) querymenu.name, 32);
-				if(m < queryctrl->maximum) strncat(t, " | ", 3);
+				if(m < queryctrl->maximum) strcat(t, " | ");
 			}
 		}
 		

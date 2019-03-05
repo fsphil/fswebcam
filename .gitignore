@@ -6,6 +6,7 @@
 *.jpeg
 *.jpg
 *.png
+*.webp
 
 # Build stuff
 Makefile

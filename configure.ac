@@ -55,6 +55,11 @@ if test "$HAVE_PNG" != "yes"; then
 	AC_MSG_ERROR([GD does not have PNG support!])
 fi
 
+AC_CHECK_LIB(gd, gdImageWebpEx, HAVE_WEBP="yes",HAVE_WEBP="no",)
+if test "$HAVE_WEBP" == "yes"; then
+	AC_DEFINE([HAVE_WEBP], [1], [WebP output support.])
+fi
+
 # The V4Lx headers are now included along with the source.
 
 #AC_CHECK_HEADER(linux/videodev.h, HAVE_V4L1="yes",,)
@@ -75,6 +80,7 @@ AC_MSG_RESULT([
    Buffer type ........... $BUFFER_BITS bit
    PNG support ........... $HAVE_PNG
    JPEG support .......... $HAVE_JPEG
+   WEBP support .......... $HAVE_WEBP
    Freetype 2.x support .. $HAVE_FT2
    V4L1 support .......... $HAVE_V4L1
    V4L2 support .......... $HAVE_V4L2

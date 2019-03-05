@@ -40,6 +40,7 @@
 
 #define FORMAT_JPEG (0)
 #define FORMAT_PNG  (1)
+#define FORMAT_WEBP (2)
 
 enum fswc_options {
 	OPT_VERSION = 128,
@@ -89,6 +90,7 @@ enum fswc_options {
 	OPT_NO_OVERLAY,
 	OPT_JPEG,
 	OPT_PNG,
+	OPT_WEBP,
 	OPT_SAVE,
 	OPT_EXEC,
 	OPT_DUMPFRAME,
@@ -502,10 +504,18 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 		MSG("Writing JPEG image to '%s'.", filename);
 		gdImageJpeg(im, f, config->compression);
 		break;
+	
 	case FORMAT_PNG:
 		MSG("Writing PNG image to '%s'.", filename);
 		gdImagePngEx(im, f, config->compression);
 		break;
+
+#ifdef HAVE_WEBP
+	case FORMAT_WEBP:
+		MSG("Writing WEBP image to '%s'.", filename);
+		gdImageWebpEx(im, f, config->compression);
+		break;
+#endif
 	}
 	
 	if(f != stdout) fclose(f);
@@ -950,6 +960,14 @@ int fswc_grab(fswebcam_config_t *config)
 			config->format = FORMAT_PNG;
 			config->compression = atoi(options);
 			break;
+#ifdef HAVE_WEBP
+		case OPT_WEBP:
+			modified = 1;
+			MSG("Setting output format to WEBP, quality %i", atoi(options));
+			config->format = FORMAT_WEBP;
+			config->compression = atoi(options);
+			break;
+#endif
 		}
 	}
 	
@@ -1143,6 +1161,9 @@ int fswc_usage()
 	       "     --no-overlay             Clears the overlay.\n"
 	       "     --jpeg <factor>          Outputs a JPEG image. (-1, 0 - 95)\n"
 	       "     --png <factor>           Outputs a PNG image. (-1, 0 - 9)\n"
+#ifdef HAVE_WEBP
+	       "     --webp <factor>          Outputs a WEBP image. (-1, 0 - 100)\n"
+#endif
 	       "     --save <filename>        Save image to file.\n"
 	       "     --exec <command>         Execute a command and wait for it to complete.\n"
 	       "\n");
@@ -1387,6 +1408,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"no-overlay",      no_argument,       0, OPT_NO_OVERLAY},
 		{"jpeg",            required_argument, 0, OPT_JPEG},
 		{"png",             required_argument, 0, OPT_PNG},
+#ifdef HAVE_WEBP
+		{"webp",            required_argument, 0, OPT_WEBP},
+#endif
 		{"save",            required_argument, 0, OPT_SAVE},
 		{"exec",            required_argument, 0, OPT_EXEC},
 		{0, 0, 0, 0}

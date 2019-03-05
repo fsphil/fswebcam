@@ -3617,6 +3617,54 @@ if test "$HAVE_PNG" != "yes"; then
 	as_fn_error $? "GD does not have PNG support!" "$LINENO" 5
 fi
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for gdImageWebpEx in -lgd" >&5
+$as_echo_n "checking for gdImageWebpEx in -lgd... " >&6; }
+if ${ac_cv_lib_gd_gdImageWebpEx+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgd  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char gdImageWebpEx ();
+int
+main ()
+{
+return gdImageWebpEx ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_gd_gdImageWebpEx=yes
+else
+  ac_cv_lib_gd_gdImageWebpEx=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gd_gdImageWebpEx" >&5
+$as_echo "$ac_cv_lib_gd_gdImageWebpEx" >&6; }
+if test "x$ac_cv_lib_gd_gdImageWebpEx" = xyes; then :
+  HAVE_WEBP="yes"
+else
+  HAVE_WEBP="no"
+fi
+
+if test "$HAVE_WEBP" == "yes"; then
+
+$as_echo "#define HAVE_WEBP 1" >>confdefs.h
+
+fi
+
 # The V4Lx headers are now included along with the source.
 
 #AC_CHECK_HEADER(linux/videodev.h, HAVE_V4L1="yes",,)
@@ -3637,6 +3685,7 @@ fi
    Buffer type ........... $BUFFER_BITS bit
    PNG support ........... $HAVE_PNG
    JPEG support .......... $HAVE_JPEG
+   WEBP support .......... $HAVE_WEBP
    Freetype 2.x support .. $HAVE_FT2
    V4L1 support .......... $HAVE_V4L1
    V4L2 support .......... $HAVE_V4L2
@@ -3645,6 +3694,7 @@ $as_echo "
    Buffer type ........... $BUFFER_BITS bit
    PNG support ........... $HAVE_PNG
    JPEG support .......... $HAVE_JPEG
+   WEBP support .......... $HAVE_WEBP
    Freetype 2.x support .. $HAVE_FT2
    V4L1 support .......... $HAVE_V4L1
    V4L2 support .......... $HAVE_V4L2

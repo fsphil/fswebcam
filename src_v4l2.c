@@ -484,7 +484,6 @@ int src_v4l2_set_controls(src_t *src)
 {
 	src_v4l2_t *s = (src_v4l2_t *) src->state;
 	struct v4l2_queryctrl queryctrl;
-	int c;
 	
 	memset(&queryctrl, 0, sizeof(queryctrl));
 	

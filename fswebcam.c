@@ -1600,7 +1600,7 @@ int fswc_free_config(fswebcam_config_t *config)
 int main(int argc, char *argv[])
 {
 	fswebcam_config_t *config;
-	int r;
+	int r = 0;
 	
 	/* Set the locale to the system default */
 	setlocale(LC_ALL, "");

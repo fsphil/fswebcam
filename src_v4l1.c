@@ -514,7 +514,7 @@ int src_v4l_set_picture(src_t *src, int fd, struct video_capability *vd)
 	
 	v4l_pal = 2; /* Skip the JPEG palette. */
 	
-	if(src->palette != -1)
+	if(src->palette != SRC_PAL_ANY)
 	{
 		v4l_pal = 0;
 		
@@ -548,7 +548,7 @@ int src_v4l_set_picture(src_t *src, int fd, struct video_capability *vd)
 			return(0);
 		}
 		
-		if(src->palette != -1) break;
+		if(src->palette != SRC_PAL_ANY) break;
 		
 		WARN("The device does not support palette %s.",
 		     src_palette[v4l_palette[v4l_pal].src].name);

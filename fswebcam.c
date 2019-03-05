@@ -1071,7 +1071,7 @@ int fswc_find_palette(char *name)
 	for(i = 0; src_palette[i].name != NULL; i++)
 		ERROR("%s", src_palette[i].name);
 	
-	return(-1);
+	return(SRC_PAL_ANY);
 }
 
 int fswc_usage()
@@ -1527,7 +1527,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 			break;
 		case 'p':
 			config->palette = fswc_find_palette(optarg);
-			if(config->palette == -1) return(-1);
+			if(config->palette == SRC_PAL_ANY) return(-1);
 			break;
 		case 'R':
 			config->use_read = -1;

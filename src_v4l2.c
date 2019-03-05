@@ -542,7 +542,7 @@ int src_v4l2_set_pix_format(src_t *src)
 	/* Step through each palette type. */
 	v4l2_pal = 0;
 	
-	if(src->palette != -1)
+	if(src->palette != SRC_PAL_ANY)
 	{
 		while(v4l2_palette[v4l2_pal].v4l2)
 		{
@@ -607,7 +607,7 @@ int src_v4l2_set_pix_format(src_t *src)
 			return(0);
 		}
 		
-		if(src->palette != -1) break;
+		if(src->palette != SRC_PAL_ANY) break;
 		
 		v4l2_pal++;
 	}

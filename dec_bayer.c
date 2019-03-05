@@ -73,8 +73,13 @@ int fswc_add_image_bayer(avgbmp_t *dst, uint8_t *img, uint32_t length, uint32_t 
 		di = (*p[0] + *p[2] + *p[5] + *p[7]) / 4;
 		
 		/* Calculate RGB */
-		if(palette == SRC_PAL_BAYER) mode = (x + y) & 0x01;
-		else mode = ~(x + y) & 0x01;
+		if(palette == SRC_PAL_SBGGR8 ||
+		   palette == SRC_PAL_SRGGB8 ||
+		   palette == SRC_PAL_BAYER) {
+			mode = (x + y) & 0x01;
+		} else {
+			mode = ~(x + y) & 0x01;
+		}
 		
 		if(mode)
 		{
@@ -85,7 +90,9 @@ int fswc_add_image_bayer(avgbmp_t *dst, uint8_t *img, uint32_t length, uint32_t 
 		else if(y & 0x01) { r = *img; g = (vn + hn) / 2; b = di; }
 		else              { b = *img; g = (vn + hn) / 2; r = di; }
 		
-		if(palette == SRC_PAL_SGRBG8)
+		if(palette == SRC_PAL_SGRBG8 ||
+		   palette == SRC_PAL_SRGGB8 ||
+		   palette == SRC_PAL_BAYER)
 		{
 			uint8_t t = r;
 			r = b;

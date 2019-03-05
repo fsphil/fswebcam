@@ -631,12 +631,20 @@ int fswc_grab(fswebcam_config_t *config)
 			
 			MSG("Dumping raw frame to '%s'...", config->dumpframe);
 			
-			f = fopen(config->dumpframe, "wb");
-			if(!f) ERROR("fopen: %s", strerror(errno));
+			f = strcmp(config->dumpframe, "-") == 0 ? stdout : fopen(config->dumpframe, "wb");
+			
+			if(f == stdout && config->background)
+			{
+				ERROR("stdout is unavailable in background mode.");
+			}
+			else if(!f)
+			{
+				ERROR("fopen: %s", strerror(errno));
+			}
 			else
 			{
 				fwrite(src.img, 1, src.length, f);
-				fclose(f);
+				if(f != stdout) fclose(f);
 			}
 		}
 		

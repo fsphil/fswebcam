@@ -682,6 +682,7 @@ int fswc_grab(fswebcam_config_t *config)
 			break;
 		case SRC_PAL_YUYV:
 		case SRC_PAL_UYVY:
+		case SRC_PAL_VYUY:
 			fswc_add_image_yuyv(&src, abitmap);
 			break;
 		case SRC_PAL_YUV420P:

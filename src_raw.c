@@ -64,6 +64,7 @@ int src_raw_open(src_t *src)
 	case SRC_PAL_RGB555:
 	case SRC_PAL_YUYV:
 	case SRC_PAL_UYVY:
+	case SRC_PAL_VYUY:
 	case SRC_PAL_Y16:
 		s->size = src->width * src->height * 2;
 		break;

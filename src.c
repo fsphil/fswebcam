@@ -56,6 +56,7 @@ src_palette_t src_palette[] = {
 	{ "BGR24" },
 	{ "YUYV" },
 	{ "UYVY" },
+	{ "VYUY" },
 	{ "YUV420P" },
 	{ "NV12MB" },
 	{ "BAYER" },

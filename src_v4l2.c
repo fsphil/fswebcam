@@ -805,7 +805,13 @@ static int src_v4l2_open(src_t *src)
 		ERROR("No device name specified.");
 		return(-2);
 	}
-	
+
+	if(src->state)
+	{
+		ERROR("device reopen ??");
+		return(-2);
+	}
+
 	/* Allocate memory for the state structure. */
 	s = calloc(sizeof(src_v4l2_t), 1);
 	if(!s)
@@ -822,7 +828,7 @@ static int src_v4l2_open(src_t *src)
 	{
 		ERROR("Error opening device: %s", src->source);
 		ERROR("open: %s", strerror(errno));
-		free(s);
+		src_v4l2_close(src);
 		return(-2);
 	}
 	
@@ -888,7 +894,10 @@ static int src_v4l2_open(src_t *src)
 static int src_v4l2_close(src_t *src)
 {
 	src_v4l2_t *s = (src_v4l2_t *) src->state;
-	
+
+	if (s == NULL)
+		return(0);
+
 	if(s->buffer)
 	{
 		if(src->use_read != 0)
@@ -903,7 +912,8 @@ static int src_v4l2_close(src_t *src)
 	}
 	if(s->fd >= 0) close(s->fd);
 	free(s);
-	
+	src->state = NULL;
+
 	return(0);
 }
 

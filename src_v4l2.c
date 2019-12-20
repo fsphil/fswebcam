@@ -33,8 +33,7 @@ typedef struct {
 typedef struct {
 	
 	int fd;
-	char map;
-	
+
 	struct v4l2_capability cap;
 	struct v4l2_format fmt;
 	struct v4l2_requestbuffers req;
@@ -642,10 +641,20 @@ int src_v4l2_free_mmap(src_t *src)
 {
 	src_v4l2_t *s = (src_v4l2_t *) src->state;
 	int i;
-	
+
+	if (s->buffer == NULL)
+		return(0);
+
 	for(i = 0; i < s->req.count; i++)
-		munmap(s->buffer[i].start, s->buffer[i].length);
-	
+	{
+		if (s->buffer[i].start != MAP_FAILED)
+		{
+			munmap(s->buffer[i].start, s->buffer[i].length);
+			s->buffer[i].start = MAP_FAILED;
+			s->buffer[i].length = 0;
+		}
+	}
+
 	return(0);
 }
 
@@ -686,7 +695,11 @@ int src_v4l2_set_mmap(src_t *src)
 		ERROR("Out of memory.");
 		return(-1);
 	}
-	
+
+	/* Initial default value the mmap video buffer address */
+	for (b = 0 ; b < s->req.count; b++)
+		s->buffer[b].start = MAP_FAILED;
+
 	for(b = 0; b < s->req.count; b++)
 	{
 		struct v4l2_buffer buf;
@@ -701,9 +714,7 @@ int src_v4l2_set_mmap(src_t *src)
 		{
 			ERROR("Error querying buffer %i", b);
 			ERROR("VIDIOC_QUERYBUF: %s", strerror(errno));
-			free(s->buffer);
-			s->buffer = NULL;
-			return(-1);
+			goto fail_free;
 		}
 		
 		s->buffer[b].length = buf.length;
@@ -714,17 +725,12 @@ int src_v4l2_set_mmap(src_t *src)
 		{
 			ERROR("Error mapping buffer %i", b);
 			ERROR("mmap: %s", strerror(errno));
-			s->req.count = b;
-			src_v4l2_free_mmap(src);
-			free(s->buffer);
-			s->buffer = NULL;
-			return(-1);
+			goto fail_unmmap;
 		}
 		
 		DEBUG("%i length=%d", b, buf.length);
 	}
 	
-	s->map = -1;
 	
 	for(b = 0; b < s->req.count; b++)
 	{
@@ -737,10 +743,7 @@ int src_v4l2_set_mmap(src_t *src)
 		if(ioctl(s->fd, VIDIOC_QBUF, &s->buf) == -1)
 		{
 			ERROR("VIDIOC_QBUF: %s", strerror(errno));
-			src_v4l2_free_mmap(src);
-			free(s->buffer);
-			s->buffer = NULL;
-			return(-1);
+			goto fail_unmmap;
 		}
 	}
 	
@@ -750,13 +753,18 @@ int src_v4l2_set_mmap(src_t *src)
 	{
 		ERROR("Error starting stream.");
 		ERROR("VIDIOC_STREAMON: %s", strerror(errno));
-		src_v4l2_free_mmap(src);
-		free(s->buffer);
-		s->buffer = NULL;
-		return(-1);
+		goto fail_unmmap;
 	}
 	
 	return(0);
+
+fail_unmmap:
+	src_v4l2_free_mmap(src);
+	s->req.count = 0;
+fail_free:
+	free(s->buffer);
+	s->buffer = NULL;
+	return(-1);
 }
 
 int src_v4l2_set_read(src_t *src)
@@ -883,8 +891,14 @@ static int src_v4l2_close(src_t *src)
 	
 	if(s->buffer)
 	{
-		if(!s->map) free(s->buffer[0].start);
-		else src_v4l2_free_mmap(src);
+		if(src->use_read != 0)
+			free(s->buffer[0].start);
+		else
+		{
+			src_v4l2_free_mmap(src);
+			s->req.count = 0;
+		}
+
 		free(s->buffer);
 	}
 	if(s->fd >= 0) close(s->fd);
@@ -925,7 +939,7 @@ static int src_v4l2_grab(src_t *src)
 		}
 	}
 	
-	if(s->map)
+	if(src->use_read == 0)
 	{
 		if(s->pframe >= 0)
 		{

@@ -42,7 +42,7 @@ typedef struct {
 	v4l2_buffer_t *buffer;
 	
 	int pframe;
-	
+	char stream_on;
 } src_v4l2_t;
 
 static int src_v4l2_close(src_t *src);
@@ -637,6 +637,49 @@ int src_v4l2_set_fps(src_t *src)
 	return(0);
 }
 
+int src_v4l2_stream_on(src_t *src)
+{
+	enum v4l2_buf_type type;
+
+	src_v4l2_t *s = (src_v4l2_t *) src->state;
+
+	if (s->stream_on == 1)
+		return(0);
+
+	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	if(ioctl(s->fd, VIDIOC_STREAMON, &type) == -1)
+	{
+		ERROR("Error starting stream.");
+		ERROR("VIDIOC_STREAMON: %s", strerror(errno));
+		s->stream_on = 0;
+		return(-1);
+	}
+
+	s->stream_on = 1;
+	return(0);
+}
+
+int src_v4l2_stream_off(src_t *src)
+{
+	enum v4l2_buf_type type;
+
+	src_v4l2_t *s = (src_v4l2_t *) src->state;
+
+	if (s->stream_on == 0)
+		return(0);
+
+	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	if(ioctl(s->fd, VIDIOC_STREAMOFF, &type) == -1)
+	{
+		ERROR("Error stoping stream.");
+		ERROR("VIDIOC_STREAMOFF: %s", strerror(errno));
+		return(-1);
+	}
+
+	s->stream_on = 0;
+	return(0);
+}
+
 int src_v4l2_free_mmap(src_t *src)
 {
 	src_v4l2_t *s = (src_v4l2_t *) src->state;
@@ -746,16 +789,7 @@ int src_v4l2_set_mmap(src_t *src)
 			goto fail_unmmap;
 		}
 	}
-	
-	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	
-	if(ioctl(s->fd, VIDIOC_STREAMON, &type) == -1)
-	{
-		ERROR("Error starting stream.");
-		ERROR("VIDIOC_STREAMON: %s", strerror(errno));
-		goto fail_unmmap;
-	}
-	
+
 	return(0);
 
 fail_unmmap:
@@ -887,7 +921,9 @@ static int src_v4l2_open(src_t *src)
 	}
 	
 	s->pframe = -1;
-	
+
+	src_v4l2_stream_on(src);
+
 	return(0);
 }
 
@@ -897,6 +933,8 @@ static int src_v4l2_close(src_t *src)
 
 	if (s == NULL)
 		return(0);
+
+	src_v4l2_stream_off(src);
 
 	if(s->buffer)
 	{

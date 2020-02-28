@@ -55,6 +55,8 @@ int src_raw_open(src_t *src)
 		free(s);
 		return(-1);
 	case SRC_PAL_RGB32:
+	case SRC_PAL_BGR32:
+	case SRC_PAL_ABGR32:
 		s->size = src->width * src->height * 4;
 		break;
 	case SRC_PAL_RGB24:

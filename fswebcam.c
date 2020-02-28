@@ -665,6 +665,7 @@ int fswc_grab(fswebcam_config_t *config)
 			fswc_add_image_rgb32(&src, abitmap);
 			break;
 		case SRC_PAL_BGR32:
+		case SRC_PAL_ABGR32:
 			fswc_add_image_bgr32(&src, abitmap);
 			break;
 		case SRC_PAL_RGB24:

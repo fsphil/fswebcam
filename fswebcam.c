@@ -46,6 +46,7 @@ enum fswc_options {
 	OPT_VERSION = 128,
 	OPT_PID,
 	OPT_OFFSET,
+	OPT_COUNT,
 	OPT_LIST_INPUTS,
 	OPT_LIST_TUNERS,
 	OPT_LIST_FORMATS,
@@ -123,6 +124,7 @@ typedef struct {
 	/* General options. */
 	unsigned long loop;
 	signed long offset;
+	unsigned int count;
 	unsigned char background;
 	char *pidfile;
 	char *logfile;
@@ -1114,6 +1116,7 @@ int fswc_usage()
 	       "     --version                Displays the version and exits.\n"
 	       " -l, --loop <seconds>         Run in loop mode.\n"
 	       "     --offset <seconds>       Sets the capture time offset in loop mode.\n"
+	       "     --count <number>         Loop this many times and exit. Default is forever.\n"
 	       " -b, --background             Run in the background.\n"
 	       "     --pid <filename>         Saves background process PID to filename.\n"
 	       " -L, --log [file/syslog:]<filename> Redirect log messages to a file or syslog.\n"
@@ -1361,6 +1364,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"version",         no_argument,       0, OPT_VERSION},
 		{"loop",            required_argument, 0, 'l'},
 		{"offset",          required_argument, 0, OPT_OFFSET},
+		{"count",           required_argument, 0, OPT_COUNT},
 		{"background",      no_argument,       0, 'b'},
 		{"pid",             required_argument, 0, OPT_PID},
 		{"log",             required_argument, 0, 'L'},
@@ -1436,6 +1440,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	/* Set the defaults. */
 	config->loop = 0;
 	config->offset = 0;
+	config->count = 0;
 	config->background = 0;
 	config->pidfile = NULL;
 	config->logfile = NULL;
@@ -1501,6 +1506,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 			break;
 		case OPT_OFFSET:
 			config->offset = atol(optarg);
+			break;
+		case OPT_COUNT:
+			config->count = atol(optarg);
 			break;
 		case 'b':
 			config->background = -1;
@@ -1723,6 +1731,9 @@ int main(int argc, char *argv[])
 			
 			/* Capture the image. */
 			r = fswc_grab(config);
+			
+			/* Limit number of captures if a loop count was specified */
+			if(config->count > 0 && !--config->count) break;
 		}
 	}
 	

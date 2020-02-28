@@ -7,6 +7,7 @@ fswebcam-xxxxxxxx
   - Add new Bayer palettes. (Eugen Hristev)
   - Add WebP output support.
   - Add option to dump raw frames to stdout. (Philipp Simon Schmidt)
+  - Add option to limit number of times to loop.
 
 fswebcam-20140113
   

@@ -52,6 +52,7 @@ src_palette_t src_palette[] = {
 	{ "S561" },
 	{ "RGB32" },
 	{ "BGR32" },
+	{ "ABGR32" },
 	{ "RGB24" },
 	{ "BGR24" },
 	{ "YUYV" },

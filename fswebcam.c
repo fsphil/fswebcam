@@ -95,6 +95,7 @@ enum fswc_options {
 	OPT_SAVE,
 	OPT_EXEC,
 	OPT_DUMPFRAME,
+	OPT_JUST_DUMP,
 	OPT_FPS,
 };
 
@@ -152,7 +153,7 @@ typedef struct {
 	int palette;
 	src_option_t **option;
 	char *dumpframe;
-	
+	char just_dump;
 	/* Job queue. */
 	uint8_t jobs;
 	fswebcam_job_t **job;
@@ -601,13 +602,20 @@ int fswc_grab(fswebcam_config_t *config)
 	config->height = src.height;
 	
 	/* Allocate memory for the average bitmap buffer. */
-	abitmap = calloc(config->width * config->height * 3, sizeof(avgbmp_t));
-	if(!abitmap)
+	if(!config->just_dump)
 	{
-		ERROR("Out of memory.");
-		return(-1);
+		abitmap = calloc(config->width * config->height * 3, sizeof(avgbmp_t));
+		if(!abitmap)
+		{
+			ERROR("Out of memory.");
+			return(-1);
+		}
 	}
-	
+	else
+	{
+		config->frames = 1;
+	}
+
 	if(config->frames == 1) HEAD("--- Capturing frame...");
 	else HEAD("--- Capturing %i frames...", config->frames);
 	
@@ -649,63 +657,65 @@ int fswc_grab(fswebcam_config_t *config)
 				if(f != stdout) fclose(f);
 			}
 		}
-		
-		/* Add frame to the average bitmap. */
-		switch(src.palette)
+		if(!config->just_dump)
 		{
-		case SRC_PAL_PNG:
-			fswc_add_image_png(&src, abitmap);
-			break;
-		case SRC_PAL_JPEG:
-		case SRC_PAL_MJPEG:
-			fswc_add_image_jpeg(&src, abitmap);
-			break;
-		case SRC_PAL_S561:
-			fswc_add_image_s561(abitmap, src.img, src.length, src.width, src.height, src.palette);
-			break;
-		case SRC_PAL_RGB32:
-			fswc_add_image_rgb32(&src, abitmap);
-			break;
-		case SRC_PAL_BGR32:
-		case SRC_PAL_ABGR32:
-			fswc_add_image_bgr32(&src, abitmap);
-			break;
-		case SRC_PAL_RGB24:
-			fswc_add_image_rgb24(&src, abitmap);
-			break;
-		case SRC_PAL_BGR24:
-			fswc_add_image_bgr24(&src, abitmap);
-			break;
-		case SRC_PAL_BAYER:
-		case SRC_PAL_SBGGR8:
-		case SRC_PAL_SRGGB8:
-		case SRC_PAL_SGBRG8:
-		case SRC_PAL_SGRBG8:
-			fswc_add_image_bayer(abitmap, src.img, src.length, src.width, src.height, src.palette);
-			break;
-		case SRC_PAL_YUYV:
-		case SRC_PAL_UYVY:
-		case SRC_PAL_VYUY:
-			fswc_add_image_yuyv(&src, abitmap);
-			break;
-		case SRC_PAL_YUV420P:
-			fswc_add_image_yuv420p(&src, abitmap);
-			break;
-		case SRC_PAL_NV12MB:
-			fswc_add_image_nv12mb(&src, abitmap);
-			break;
-		case SRC_PAL_RGB565:
-			fswc_add_image_rgb565(&src, abitmap);
-			break;
-		case SRC_PAL_RGB555:
-			fswc_add_image_rgb555(&src, abitmap);
-			break;
-		case SRC_PAL_Y16:
-			fswc_add_image_y16(&src, abitmap);
-			break;
-		case SRC_PAL_GREY:
-			fswc_add_image_grey(&src, abitmap);
-			break;
+			/* Add frame to the average bitmap. */
+			switch(src.palette)
+			{
+			case SRC_PAL_PNG:
+				fswc_add_image_png(&src, abitmap);
+				break;
+			case SRC_PAL_JPEG:
+			case SRC_PAL_MJPEG:
+				fswc_add_image_jpeg(&src, abitmap);
+				break;
+			case SRC_PAL_S561:
+				fswc_add_image_s561(abitmap, src.img, src.length, src.width, src.height, src.palette);
+				break;
+			case SRC_PAL_RGB32:
+				fswc_add_image_rgb32(&src, abitmap);
+				break;
+			case SRC_PAL_BGR32:
+			case SRC_PAL_ABGR32:
+				fswc_add_image_bgr32(&src, abitmap);
+				break;
+			case SRC_PAL_RGB24:
+				fswc_add_image_rgb24(&src, abitmap);
+				break;
+			case SRC_PAL_BGR24:
+				fswc_add_image_bgr24(&src, abitmap);
+				break;
+			case SRC_PAL_BAYER:
+			case SRC_PAL_SBGGR8:
+			case SRC_PAL_SRGGB8:
+			case SRC_PAL_SGBRG8:
+			case SRC_PAL_SGRBG8:
+				fswc_add_image_bayer(abitmap, src.img, src.length, src.width, src.height, src.palette);
+				break;
+			case SRC_PAL_YUYV:
+			case SRC_PAL_UYVY:
+			case SRC_PAL_VYUY:
+				fswc_add_image_yuyv(&src, abitmap);
+				break;
+			case SRC_PAL_YUV420P:
+				fswc_add_image_yuv420p(&src, abitmap);
+				break;
+			case SRC_PAL_NV12MB:
+				fswc_add_image_nv12mb(&src, abitmap);
+				break;
+			case SRC_PAL_RGB565:
+				fswc_add_image_rgb565(&src, abitmap);
+				break;
+			case SRC_PAL_RGB555:
+				fswc_add_image_rgb555(&src, abitmap);
+				break;
+			case SRC_PAL_Y16:
+				fswc_add_image_y16(&src, abitmap);
+				break;
+			case SRC_PAL_GREY:
+				fswc_add_image_grey(&src, abitmap);
+				break;
+			}
 		}
 	}
 	
@@ -716,278 +726,282 @@ int fswc_grab(fswebcam_config_t *config)
 	if(!frame)
 	{
 		ERROR("No frames captured.");
-		free(abitmap);
-		return(-1);
-	}
-	
-	HEAD("--- Processing captured image...");
-	
-	/* Copy the average bitmap image to a gdImage. */
-	original = gdImageCreateTrueColor(config->width, config->height);
-	if(!original)
-	{
-		ERROR("Out of memory.");
-		free(abitmap);
-		return(-1);
-	}
-	
-	pbitmap = abitmap;
-	for(y = 0; y < config->height; y++)
-		for(x = 0; x < config->width; x++)
+		if(!config->just_dump)
 		{
-			int px = x;
-			int py = y;
-			int colour;
-			
-			colour  = (*(pbitmap++) / config->frames) << 16;
-			colour += (*(pbitmap++) / config->frames) << 8;
-			colour += (*(pbitmap++) / config->frames);
-			
-			gdImageSetPixel(original, px, py, colour);
+			free(abitmap);
 		}
-	
-	free(abitmap);
-	
-	/* Make a copy of the original image. */
-	image = fswc_gdImageDuplicate(original);
-	if(!image)
-	{
-		ERROR("Out of memory.");
-		gdImageDestroy(image);
 		return(-1);
 	}
-	
-	/* Set the default values for this run. */
-	if(config->font) free(config->font);
-	if(config->title) free(config->title);
-	if(config->subtitle) free(config->subtitle);
-	if(config->timestamp) free(config->timestamp);
-	if(config->info) free(config->info);
-	if(config->underlay) free(config->underlay);
-	if(config->overlay) free(config->overlay);
-	if(config->filename) free(config->filename);
-	
-	config->banner       = BOTTOM_BANNER;
-	config->bg_colour    = 0x40263A93;
-	config->bl_colour    = 0x00FF0000;
-	config->fg_colour    = 0x00FFFFFF;
-	config->font         = strdup("sans");
-	config->fontsize     = 10;
-	config->shadow       = 1;
-	config->title        = NULL;
-	config->subtitle     = NULL;
-	config->timestamp    = strdup("%Y-%m-%d %H:%M (%Z)");
-	config->info         = NULL;
-	config->underlay     = NULL;
-	config->overlay      = NULL;
-	config->filename     = NULL;
-	config->format       = FORMAT_JPEG;
-	config->compression  = -1;
-	
-	modified = 1;
-	
-	/* Run through the jobs list. */
-	for(x = 0; x < config->jobs; x++)
+	if(!config->just_dump)
 	{
-		uint16_t id   = config->job[x]->id;
-		char *options = config->job[x]->options;
+		HEAD("--- Processing captured image...");
 		
-		switch(id)
+		/* Copy the average bitmap image to a gdImage. */
+		original = gdImageCreateTrueColor(config->width, config->height);
+		if(!original)
 		{
-		case 1: /* A non-option argument: a filename. */
-		case OPT_SAVE:
-			fswc_output(config, options, image);
-			modified = 0;
-			break;
-		case OPT_EXEC:
-			fswc_exec(config, options);
-			break;
-		case OPT_REVERT:
-			modified = 1;
-			gdImageDestroy(image);
-			image = fswc_gdImageDuplicate(original);
-			break;
-		case OPT_FLIP:
-			modified = 1;
-			image = fx_flip(image, options);
-			break;
-		case OPT_CROP:
-			modified = 1;
-			image = fx_crop(image, options);
-			break;
-		case OPT_SCALE:
-			modified = 1;
-			image = fx_scale(image, options);
-			break;
-		case OPT_ROTATE:
-			modified = 1;
-			image = fx_rotate(image, options);
-			break;
-		case OPT_DEINTERLACE:
-			modified = 1;
-			image = fx_deinterlace(image, options);
-			break;
-		case OPT_INVERT:
-			modified = 1;
-			image = fx_invert(image, options);
-			break;
-		case OPT_GREYSCALE:
-			modified = 1;
-			image = fx_greyscale(image, options);
-			break;
-		case OPT_SWAPCHANNELS:
-			modified = 1;
-			image = fx_swapchannels(image, options);
-			break;
-		case OPT_NO_BANNER:
-			modified = 1;
-			MSG("Disabling banner.");
-			config->banner = NO_BANNER;
-			break;
-		case OPT_TOP_BANNER:
-			modified = 1;
-			MSG("Putting banner at the top.");
-			config->banner = TOP_BANNER;
-			break;
-		case OPT_BOTTOM_BANNER:
-			modified = 1;
-			MSG("Putting banner at the bottom.");
-			config->banner = BOTTOM_BANNER;
-			break;
-		case OPT_BG_COLOUR:
-			modified = 1;
-			MSG("Setting banner background colour to %s.", options);
-			if(sscanf(options, "#%X", &config->bg_colour) != 1)
-				WARN("Bad background colour: %s", options);
-			break;
-		case OPT_BL_COLOUR:
-			modified = 1;
-			MSG("Setting banner line colour to %s.", options);
-			if(sscanf(options, "#%X", &config->bl_colour) != 1)
-				WARN("Bad line colour: %s", options);
-			break;
-		case OPT_FG_COLOUR:
-			modified = 1;
-			MSG("Setting banner text colour to %s.", options);
-			if(sscanf(options, "#%X", &config->fg_colour) != 1)
-				WARN("Bad text colour: %s", options);
-			break;
-		case OPT_FONT:
-			modified = 1;
-			MSG("Setting font to %s.", options);
-			if(parse_font(options, &config->font, &config->fontsize))
-				WARN("Bad font: %s", options);
-			break;
-		case OPT_NO_SHADOW:
-			modified = 1;
-			MSG("Disabling text shadow.");
-			config->shadow = 0;
-			break;
-		case OPT_SHADOW:
-			modified = 1;
-			MSG("Enabling text shadow.");
-			config->shadow = 1;
-			break;
-		case OPT_TITLE:
-			modified = 1;
-			MSG("Setting title \"%s\".", options);
-			if(config->title) free(config->title);
-			config->title = strdup(options);
-			break;
-		case OPT_NO_TITLE:
-			modified = 1;
-			MSG("Clearing title.");
-			if(config->title) free(config->title);
-			config->title = NULL;
-			break;
-		case OPT_SUBTITLE:
-			modified = 1;
-			MSG("Setting subtitle \"%s\".", options);
-			if(config->subtitle) free(config->subtitle);
-			config->subtitle = strdup(options);
-			break;
-		case OPT_NO_SUBTITLE:
-			modified = 1;
-			MSG("Clearing subtitle.");
-			if(config->subtitle) free(config->subtitle);
-			config->subtitle = NULL;
-			break;
-		case OPT_TIMESTAMP:
-			modified = 1;
-			MSG("Setting timestamp \"%s\".", options);
-			if(config->timestamp) free(config->timestamp);
-			config->timestamp = strdup(options);
-			break;
-		case OPT_NO_TIMESTAMP:
-			modified = 1;
-			MSG("Clearing timestamp.");
-			if(config->timestamp) free(config->timestamp);
-			config->timestamp = NULL;
-			break;
-		case OPT_INFO:
-			modified = 1;
-			MSG("Setting info text \"%s\".", options);
-			if(config->info) free(config->info);
-			config->info = strdup(options);
-			break;
-		case OPT_NO_INFO:
-			modified = 1;
-			MSG("Clearing info text.");
-			if(config->info) free(config->info);
-			config->info = NULL;
-			break;
-		case OPT_UNDERLAY:
-			modified = 1;
-			MSG("Setting underlay image: %s", options);
-			if(config->underlay) free(config->underlay);
-			config->underlay = strdup(options);
-			break;
-		case OPT_NO_UNDERLAY:
-			modified = 1;
-			MSG("Clearing underlay.");
-			if(config->underlay) free(config->underlay);
-			config->underlay = NULL;
-			break;
-		case OPT_OVERLAY:
-			modified = 1;
-			MSG("Setting overlay image: %s", options);
-			if(config->overlay) free(config->overlay);
-			config->overlay = strdup(options);
-			break;
-		case OPT_NO_OVERLAY:
-			modified = 1;
-			MSG("Clearing overlay image.");
-			if(config->overlay) free(config->overlay);
-			config->overlay = NULL;
-			break;
-		case OPT_JPEG:
-			modified = 1;
-			MSG("Setting output format to JPEG, quality %i", atoi(options));
-			config->format = FORMAT_JPEG;
-			config->compression = atoi(options);
-			break;
-		case OPT_PNG:
-			modified = 1;
-			MSG("Setting output format to PNG, quality %i", atoi(options));
-			config->format = FORMAT_PNG;
-			config->compression = atoi(options);
-			break;
-#ifdef HAVE_WEBP
-		case OPT_WEBP:
-			modified = 1;
-			MSG("Setting output format to WEBP, quality %i", atoi(options));
-			config->format = FORMAT_WEBP;
-			config->compression = atoi(options);
-			break;
-#endif
+			ERROR("Out of memory.");
+			free(abitmap);
+			return(-1);
 		}
+		
+		pbitmap = abitmap;
+		for(y = 0; y < config->height; y++)
+			for(x = 0; x < config->width; x++)
+			{
+				int px = x;
+				int py = y;
+				int colour;
+				
+				colour  = (*(pbitmap++) / config->frames) << 16;
+				colour += (*(pbitmap++) / config->frames) << 8;
+				colour += (*(pbitmap++) / config->frames);
+				
+				gdImageSetPixel(original, px, py, colour);
+			}
+		
+		free(abitmap);
+		
+		/* Make a copy of the original image. */
+		image = fswc_gdImageDuplicate(original);
+		if(!image)
+		{
+			ERROR("Out of memory.");
+			gdImageDestroy(image);
+			return(-1);
+		}
+		
+		/* Set the default values for this run. */
+		if(config->font) free(config->font);
+		if(config->title) free(config->title);
+		if(config->subtitle) free(config->subtitle);
+		if(config->timestamp) free(config->timestamp);
+		if(config->info) free(config->info);
+		if(config->underlay) free(config->underlay);
+		if(config->overlay) free(config->overlay);
+		if(config->filename) free(config->filename);
+		
+		config->banner       = BOTTOM_BANNER;
+		config->bg_colour    = 0x40263A93;
+		config->bl_colour    = 0x00FF0000;
+		config->fg_colour    = 0x00FFFFFF;
+		config->font         = strdup("sans");
+		config->fontsize     = 10;
+		config->shadow       = 1;
+		config->title        = NULL;
+		config->subtitle     = NULL;
+		config->timestamp    = strdup("%Y-%m-%d %H:%M (%Z)");
+		config->info         = NULL;
+		config->underlay     = NULL;
+		config->overlay      = NULL;
+		config->filename     = NULL;
+		config->format       = FORMAT_JPEG;
+		config->compression  = -1;
+		
+		modified = 1;
+		
+		/* Run through the jobs list. */
+		for(x = 0; x < config->jobs; x++)
+		{
+			uint16_t id   = config->job[x]->id;
+			char *options = config->job[x]->options;
+			
+			switch(id)
+			{
+			case 1: /* A non-option argument: a filename. */
+			case OPT_SAVE:
+				fswc_output(config, options, image);
+				modified = 0;
+				break;
+			case OPT_EXEC:
+				fswc_exec(config, options);
+				break;
+			case OPT_REVERT:
+				modified = 1;
+				gdImageDestroy(image);
+				image = fswc_gdImageDuplicate(original);
+				break;
+			case OPT_FLIP:
+				modified = 1;
+				image = fx_flip(image, options);
+				break;
+			case OPT_CROP:
+				modified = 1;
+				image = fx_crop(image, options);
+				break;
+			case OPT_SCALE:
+				modified = 1;
+				image = fx_scale(image, options);
+				break;
+			case OPT_ROTATE:
+				modified = 1;
+				image = fx_rotate(image, options);
+				break;
+			case OPT_DEINTERLACE:
+				modified = 1;
+				image = fx_deinterlace(image, options);
+				break;
+			case OPT_INVERT:
+				modified = 1;
+				image = fx_invert(image, options);
+				break;
+			case OPT_GREYSCALE:
+				modified = 1;
+				image = fx_greyscale(image, options);
+				break;
+			case OPT_SWAPCHANNELS:
+				modified = 1;
+				image = fx_swapchannels(image, options);
+				break;
+			case OPT_NO_BANNER:
+				modified = 1;
+				MSG("Disabling banner.");
+				config->banner = NO_BANNER;
+				break;
+			case OPT_TOP_BANNER:
+				modified = 1;
+				MSG("Putting banner at the top.");
+				config->banner = TOP_BANNER;
+				break;
+			case OPT_BOTTOM_BANNER:
+				modified = 1;
+				MSG("Putting banner at the bottom.");
+				config->banner = BOTTOM_BANNER;
+				break;
+			case OPT_BG_COLOUR:
+				modified = 1;
+				MSG("Setting banner background colour to %s.", options);
+				if(sscanf(options, "#%X", &config->bg_colour) != 1)
+					WARN("Bad background colour: %s", options);
+				break;
+			case OPT_BL_COLOUR:
+				modified = 1;
+				MSG("Setting banner line colour to %s.", options);
+				if(sscanf(options, "#%X", &config->bl_colour) != 1)
+					WARN("Bad line colour: %s", options);
+				break;
+			case OPT_FG_COLOUR:
+				modified = 1;
+				MSG("Setting banner text colour to %s.", options);
+				if(sscanf(options, "#%X", &config->fg_colour) != 1)
+					WARN("Bad text colour: %s", options);
+				break;
+			case OPT_FONT:
+				modified = 1;
+				MSG("Setting font to %s.", options);
+				if(parse_font(options, &config->font, &config->fontsize))
+					WARN("Bad font: %s", options);
+				break;
+			case OPT_NO_SHADOW:
+				modified = 1;
+				MSG("Disabling text shadow.");
+				config->shadow = 0;
+				break;
+			case OPT_SHADOW:
+				modified = 1;
+				MSG("Enabling text shadow.");
+				config->shadow = 1;
+				break;
+			case OPT_TITLE:
+				modified = 1;
+				MSG("Setting title \"%s\".", options);
+				if(config->title) free(config->title);
+				config->title = strdup(options);
+				break;
+			case OPT_NO_TITLE:
+				modified = 1;
+				MSG("Clearing title.");
+				if(config->title) free(config->title);
+				config->title = NULL;
+				break;
+			case OPT_SUBTITLE:
+				modified = 1;
+				MSG("Setting subtitle \"%s\".", options);
+				if(config->subtitle) free(config->subtitle);
+				config->subtitle = strdup(options);
+				break;
+			case OPT_NO_SUBTITLE:
+				modified = 1;
+				MSG("Clearing subtitle.");
+				if(config->subtitle) free(config->subtitle);
+				config->subtitle = NULL;
+				break;
+			case OPT_TIMESTAMP:
+				modified = 1;
+				MSG("Setting timestamp \"%s\".", options);
+				if(config->timestamp) free(config->timestamp);
+				config->timestamp = strdup(options);
+				break;
+			case OPT_NO_TIMESTAMP:
+				modified = 1;
+				MSG("Clearing timestamp.");
+				if(config->timestamp) free(config->timestamp);
+				config->timestamp = NULL;
+				break;
+			case OPT_INFO:
+				modified = 1;
+				MSG("Setting info text \"%s\".", options);
+				if(config->info) free(config->info);
+				config->info = strdup(options);
+				break;
+			case OPT_NO_INFO:
+				modified = 1;
+				MSG("Clearing info text.");
+				if(config->info) free(config->info);
+				config->info = NULL;
+				break;
+			case OPT_UNDERLAY:
+				modified = 1;
+				MSG("Setting underlay image: %s", options);
+				if(config->underlay) free(config->underlay);
+				config->underlay = strdup(options);
+				break;
+			case OPT_NO_UNDERLAY:
+				modified = 1;
+				MSG("Clearing underlay.");
+				if(config->underlay) free(config->underlay);
+				config->underlay = NULL;
+				break;
+			case OPT_OVERLAY:
+				modified = 1;
+				MSG("Setting overlay image: %s", options);
+				if(config->overlay) free(config->overlay);
+				config->overlay = strdup(options);
+				break;
+			case OPT_NO_OVERLAY:
+				modified = 1;
+				MSG("Clearing overlay image.");
+				if(config->overlay) free(config->overlay);
+				config->overlay = NULL;
+				break;
+			case OPT_JPEG:
+				modified = 1;
+				MSG("Setting output format to JPEG, quality %i", atoi(options));
+				config->format = FORMAT_JPEG;
+				config->compression = atoi(options);
+				break;
+			case OPT_PNG:
+				modified = 1;
+				MSG("Setting output format to PNG, quality %i", atoi(options));
+				config->format = FORMAT_PNG;
+				config->compression = atoi(options);
+				break;
+#ifdef HAVE_WEBP
+			case OPT_WEBP:
+				modified = 1;
+				MSG("Setting output format to WEBP, quality %i", atoi(options));
+				config->format = FORMAT_WEBP;
+				config->compression = atoi(options);
+				break;
+#endif
+			}
+		}
+		
+		gdImageDestroy(image);
+		gdImageDestroy(original);
+		
+		if(modified) WARN("There are unsaved changes to the image.");
 	}
-	
-	gdImageDestroy(image);
-	gdImageDestroy(original);
-	
-	if(modified) WARN("There are unsaved changes to the image.");
-	
 	return(0);
 }
 
@@ -1137,6 +1151,7 @@ int fswc_usage()
 	       " -T, --timeout <seconds>      Sets the timeout for frame capture.\n"
 	       " -S, --skip <number>          Sets the number of frames to skip.\n"
 	       "     --dumpframe <filename>   Dump a raw frame to file.\n"
+	       "     --just-dump              Just dump the raw frame, no additional processing.\n"
 	       " -R, --read                   Use read() to capture images.\n"
 	       "     --list-formats           Displays the available capture formats.\n"
 	       " -s, --set <name>=<value>     Sets a control value.\n"
@@ -1385,6 +1400,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"skip",            required_argument, 0, 'S'},
 		{"palette",         required_argument, 0, 'p'},
 		{"dumpframe",       required_argument, 0, OPT_DUMPFRAME},
+		{"just-dump",       no_argument,       0, OPT_JUST_DUMP},
 		{"read",            no_argument,       0, 'R'},
 		{"list-formats",    no_argument,       0, OPT_LIST_FORMATS},
 		{"set",             required_argument, 0, 's'},
@@ -1463,6 +1479,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	config->palette = SRC_PAL_ANY;
 	config->option = NULL;
 	config->dumpframe = NULL;
+	config->just_dump = 0;
 	config->jobs = 0;
 	config->job = NULL;
 	
@@ -1583,6 +1600,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		case OPT_DUMPFRAME:
 			free(config->dumpframe);
 			config->dumpframe = strdup(optarg);
+			break;
+		case OPT_JUST_DUMP:
+			config->just_dump = -1;
 			break;
 		default:
 			/* All other options are added to the job queue. */

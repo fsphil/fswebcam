@@ -949,7 +949,7 @@ static int src_v4l2_grab(src_t *src)
 		}
 		
 		src->img    = s->buffer[s->buf.index].start;
-		src->length = s->buffer[s->buf.index].length;
+		src->length = s->buf.bytesused;
 		
 		s->pframe = s->buf.index;
 	}

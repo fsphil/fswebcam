@@ -473,7 +473,7 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 		char *err;
 		
 		/* Check if drawing text works */
-		err = gdImageStringFT(NULL, NULL, 0, config->font, config->fontsize, 0.0, 0, 0, "");
+		err = gdImageStringFT(NULL, NULL, 0, config->font, config->fontsize, 0.0, 0, 0, "A");
 		
 		if(!err) fswc_draw_banner(config, im);
 		else

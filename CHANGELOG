@@ -8,6 +8,7 @@ fswebcam-xxxxxxxx
   - Add WebP output support.
   - Add option to dump raw frames to stdout. (Philipp Simon Schmidt)
   - Add option to limit number of times to loop.
+  - Fix libgd 2.3.0+ issue where the font test always fails. (Ashley Dixon)
 
 fswebcam-20140113
   

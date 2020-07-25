@@ -1,5 +1,5 @@
 
-fswebcam-xxxxxxxx
+fswebcam-20200725
   
   - Return a non-zero if the capture fails.
   - Add option to change camera timeout from default of 10 seconds.

@@ -525,7 +525,7 @@ int src_v4l2_set_pix_format(src_t *src)
 	v4l2_pal = 0;
 	memset(&fmt, 0, sizeof(fmt));
 	fmt.index = v4l2_pal;
-	fmt.type  = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	fmt.type  = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 	
 	while(ioctl(s->fd, VIDIOC_ENUM_FMT, &fmt) != -1)
 	{
@@ -537,7 +537,7 @@ int src_v4l2_set_pix_format(src_t *src)
 		
 		memset(&fmt, 0, sizeof(fmt));
 		fmt.index = ++v4l2_pal;
-		fmt.type  = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		fmt.type  = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 	}
 	
 	/* Step through each palette type. */
@@ -564,7 +564,7 @@ int src_v4l2_set_pix_format(src_t *src)
 	{
 		/* Try the palette... */
 		memset(&s->fmt, 0, sizeof(s->fmt));
-		s->fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		s->fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 		s->fmt.fmt.pix.width       = src->width;
 		s->fmt.fmt.pix.height      = src->height;
 		s->fmt.fmt.pix.pixelformat = v4l2_palette[v4l2_pal].v4l2;
@@ -625,7 +625,7 @@ int src_v4l2_set_fps(src_t *src)
 	
 	memset(&setfps, 0, sizeof(setfps));
 	
-	setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	setfps.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 	setfps.parm.capture.timeperframe.numerator = 1;
 	setfps.parm.capture.timeperframe.denominator = src->fps;
 	if(ioctl(s->fd, VIDIOC_S_PARM, &setfps) == -1)
@@ -662,7 +662,7 @@ int src_v4l2_set_mmap(src_t *src)
 	memset(&s->req, 0, sizeof(s->req));
 	
 	s->req.count  = 4;
-	s->req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	s->req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 	s->req.memory = V4L2_MEMORY_MMAP;
 	
 	if(ioctl(s->fd, VIDIOC_REQBUFS, &s->req) == -1)
@@ -694,10 +694,14 @@ int src_v4l2_set_mmap(src_t *src)
 		
 		memset(&buf, 0, sizeof(buf));
 		
-		buf.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		buf.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 		buf.memory = V4L2_MEMORY_MMAP;
 		buf.index  = b;
 		
+		struct v4l2_plane planes[1];
+		buf.m.planes = planes;
+		buf.length = 1;
+
 		if(ioctl(s->fd, VIDIOC_QUERYBUF, &buf) == -1)
 		{
 			ERROR("Error querying buffer %i", b);
@@ -707,9 +711,9 @@ int src_v4l2_set_mmap(src_t *src)
 			return(-1);
 		}
 		
-		s->buffer[b].length = buf.length;
-		s->buffer[b].start = mmap(NULL, buf.length,
-		   PROT_READ | PROT_WRITE, MAP_SHARED, s->fd, buf.m.offset);
+		s->buffer[b].length = planes[0].length;
+		s->buffer[b].start = mmap(NULL, planes[0].length, 
+			PROT_READ | PROT_WRITE, MAP_SHARED, s->fd, planes[0].m.mem_offset);
 		
 		if(s->buffer[b].start == MAP_FAILED)
 		{
@@ -731,10 +735,14 @@ int src_v4l2_set_mmap(src_t *src)
 	{
 		memset(&s->buf, 0, sizeof(s->buf));
 		
-		s->buf.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		s->buf.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 		s->buf.memory = V4L2_MEMORY_MMAP;
 		s->buf.index  = b;
 		
+		struct v4l2_plane planes[1];
+		s->buf.m.planes = planes;
+		s->buf.length = 1;
+
 		if(ioctl(s->fd, VIDIOC_QBUF, &s->buf) == -1)
 		{
 			ERROR("VIDIOC_QBUF: %s", strerror(errno));
@@ -745,7 +753,7 @@ int src_v4l2_set_mmap(src_t *src)
 		}
 	}
 	
-	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 	
 	if(ioctl(s->fd, VIDIOC_STREAMON, &type) == -1)
 	{
@@ -939,8 +947,11 @@ static int src_v4l2_grab(src_t *src)
 		
 		memset(&s->buf, 0, sizeof(s->buf));
 		
-		s->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		s->buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE;
 		s->buf.memory = V4L2_MEMORY_MMAP;
+		struct v4l2_plane planes[1];
+		s->buf.m.planes = planes;
+		s->buf.length = 1;
 		
 		if(ioctl(s->fd, VIDIOC_DQBUF, &s->buf) == -1)
 		{

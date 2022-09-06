@@ -40,11 +40,13 @@
 
 #define FORMAT_JPEG (0)
 #define FORMAT_PNG  (1)
+#define FORMAT_WEBP (2)
 
 enum fswc_options {
 	OPT_VERSION = 128,
 	OPT_PID,
 	OPT_OFFSET,
+	OPT_COUNT,
 	OPT_LIST_INPUTS,
 	OPT_LIST_TUNERS,
 	OPT_LIST_FORMATS,
@@ -89,6 +91,7 @@ enum fswc_options {
 	OPT_NO_OVERLAY,
 	OPT_JPEG,
 	OPT_PNG,
+	OPT_WEBP,
 	OPT_SAVE,
 	OPT_EXEC,
 	OPT_DUMPFRAME,
@@ -121,6 +124,7 @@ typedef struct {
 	/* General options. */
 	unsigned long loop;
 	signed long offset;
+	unsigned int count;
 	unsigned char background;
 	char *pidfile;
 	char *logfile;
@@ -523,7 +527,7 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 		char *err;
 		
 		/* Check if drawing text works */
-		err = gdImageStringFT(NULL, NULL, 0, config->font, config->fontsize, 0.0, 0, 0, "");
+		err = gdImageStringFT(NULL, NULL, 0, config->font, config->fontsize, 0.0, 0, 0, "A");
 		
 		if(!err) fswc_draw_banner(config, im);
 		else
@@ -565,10 +569,18 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 		MSG("Writing JPEG image to '%s'.", filename);
 		gdImageJpeg(im, f, config->compression);
 		break;
+	
 	case FORMAT_PNG:
 		MSG("Writing PNG image to '%s'.", filename);
 		gdImagePngEx(im, f, config->compression);
 		break;
+
+#ifdef HAVE_WEBP
+	case FORMAT_WEBP:
+		MSG("Writing WEBP image to '%s'.", filename);
+		gdImageWebpEx(im, f, config->compression);
+		break;
+#endif
 	}
 	
 	if(f != stdout) fclose(f);
@@ -684,12 +696,20 @@ int fswc_grab(fswebcam_config_t *config)
 			
 			MSG("Dumping raw frame to '%s'...", config->dumpframe);
 			
-			f = fopen(config->dumpframe, "wb");
-			if(!f) ERROR("fopen: %s", strerror(errno));
+			f = strcmp(config->dumpframe, "-") == 0 ? stdout : fopen(config->dumpframe, "wb");
+			
+			if(f == stdout && config->background)
+			{
+				ERROR("stdout is unavailable in background mode.");
+			}
+			else if(!f)
+			{
+				ERROR("fopen: %s", strerror(errno));
+			}
 			else
 			{
 				fwrite(src.img, 1, src.length, f);
-				fclose(f);
+				if(f != stdout) fclose(f);
 			}
 		}
 		
@@ -710,6 +730,7 @@ int fswc_grab(fswebcam_config_t *config)
 			fswc_add_image_rgb32(&src, abitmap);
 			break;
 		case SRC_PAL_BGR32:
+		case SRC_PAL_ABGR32:
 			fswc_add_image_bgr32(&src, abitmap);
 			break;
 		case SRC_PAL_RGB24:
@@ -719,12 +740,15 @@ int fswc_grab(fswebcam_config_t *config)
 			fswc_add_image_bgr24(&src, abitmap);
 			break;
 		case SRC_PAL_BAYER:
+		case SRC_PAL_SBGGR8:
+		case SRC_PAL_SRGGB8:
 		case SRC_PAL_SGBRG8:
 		case SRC_PAL_SGRBG8:
 			fswc_add_image_bayer(abitmap, src.img, src.length, src.width, src.height, src.palette);
 			break;
 		case SRC_PAL_YUYV:
 		case SRC_PAL_UYVY:
+		case SRC_PAL_VYUY:
 			fswc_add_image_yuyv(&src, abitmap);
 			break;
 		case SRC_PAL_YUV420P:
@@ -1011,6 +1035,14 @@ int fswc_grab(fswebcam_config_t *config)
 			config->format = FORMAT_PNG;
 			config->compression = atoi(options);
 			break;
+#ifdef HAVE_WEBP
+		case OPT_WEBP:
+			modified = 1;
+			MSG("Setting output format to WEBP, quality %i", atoi(options));
+			config->format = FORMAT_WEBP;
+			config->compression = atoi(options);
+			break;
+#endif
 		}
 	}
 	
@@ -1132,7 +1164,7 @@ int fswc_find_palette(char *name)
 	for(i = 0; src_palette[i].name != NULL; i++)
 		ERROR("%s", src_palette[i].name);
 	
-	return(-1);
+	return(SRC_PAL_ANY);
 }
 
 int fswc_usage()
@@ -1148,6 +1180,7 @@ int fswc_usage()
 	       "     --version                Displays the version and exits.\n"
 	       " -l, --loop <seconds>         Run in loop mode.\n"
 	       "     --offset <seconds>       Sets the capture time offset in loop mode.\n"
+	       "     --count <number>         Loop this many times and exit. Default is forever.\n"
 	       " -b, --background             Run in the background.\n"
 	       "     --pid <filename>         Saves background process PID to filename.\n"
 	       " -L, --log [file/syslog:]<filename> Redirect log messages to a file or syslog.\n"
@@ -1204,6 +1237,9 @@ int fswc_usage()
 	       "     --no-overlay             Clears the overlay.\n"
 	       "     --jpeg <factor>          Outputs a JPEG image. (-1, 0 - 95)\n"
 	       "     --png <factor>           Outputs a PNG image. (-1, 0 - 9)\n"
+#ifdef HAVE_WEBP
+	       "     --webp <factor>          Outputs a WEBP image. (-1, 0 - 100)\n"
+#endif
 	       "     --save <filename>        Save image to file.\n"
 	       "     --exec <command>         Execute a command and wait for it to complete.\n"
 	       " -m, --mkdir                  Make all the directories in the path\n"
@@ -1393,6 +1429,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"version",         no_argument,       0, OPT_VERSION},
 		{"loop",            required_argument, 0, 'l'},
 		{"offset",          required_argument, 0, OPT_OFFSET},
+		{"count",           required_argument, 0, OPT_COUNT},
 		{"background",      no_argument,       0, 'b'},
 		{"pid",             required_argument, 0, OPT_PID},
 		{"log",             required_argument, 0, 'L'},
@@ -1449,6 +1486,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		{"no-overlay",      no_argument,       0, OPT_NO_OVERLAY},
 		{"jpeg",            required_argument, 0, OPT_JPEG},
 		{"png",             required_argument, 0, OPT_PNG},
+#ifdef HAVE_WEBP
+		{"webp",            required_argument, 0, OPT_WEBP},
+#endif
 		{"save",            required_argument, 0, OPT_SAVE},
 		{"exec",            required_argument, 0, OPT_EXEC},
 		{"mkdir",           no_argument,       0, 'm'},
@@ -1466,6 +1506,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	/* Set the defaults. */
 	config->loop = 0;
 	config->offset = 0;
+	config->count = 0;
 	config->background = 0;
 	config->pidfile = NULL;
 	config->logfile = NULL;
@@ -1533,6 +1574,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 		case OPT_OFFSET:
 			config->offset = atol(optarg);
 			break;
+		case OPT_COUNT:
+			config->count = atol(optarg);
+			break;
 		case 'b':
 			config->background = -1;
 			break;
@@ -1591,7 +1635,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 			break;
 		case 'p':
 			config->palette = fswc_find_palette(optarg);
-			if(config->palette == -1) return(-1);
+			if(config->palette == SRC_PAL_ANY) return(-1);
 			break;
 		case 'R':
 			config->use_read = -1;
@@ -1667,6 +1711,7 @@ int fswc_free_config(fswebcam_config_t *config)
 int main(int argc, char *argv[])
 {
 	fswebcam_config_t *config;
+	int r = 0;
 	
 	/* Set the locale to the system default */
 	setlocale(LC_ALL, "");
@@ -1698,7 +1743,7 @@ int main(int argc, char *argv[])
 	if(!gdFTUseFontConfig(1)) DEBUG("gd has no fontconfig support");
 	
 	/* Capture the image(s). */
-	if(!config->loop) fswc_grab(config);
+	if(!config->loop) r = fswc_grab(config);
 	else
 	{
 		/* Loop mode ... keep capturing images until terminated. */
@@ -1755,7 +1800,10 @@ int main(int argc, char *argv[])
 			received_sigusr1 = 0;
 			
 			/* Capture the image. */
-			fswc_grab(config);
+			r = fswc_grab(config);
+			
+			/* Limit number of captures if a loop count was specified */
+			if(config->count > 0 && !--config->count) break;
 		}
 	}
 	
@@ -1766,6 +1814,6 @@ int main(int argc, char *argv[])
 	fswc_free_config(config);
 	free(config);
 	
-	return(0);
+	return(r);
 }
 

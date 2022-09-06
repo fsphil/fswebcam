@@ -61,10 +61,14 @@ v4l2_palette_t v4l2_palette[] = {
 	{ SRC_PAL_BGR24,   V4L2_PIX_FMT_BGR24  },
 	{ SRC_PAL_RGB32,   V4L2_PIX_FMT_RGB32  },
 	{ SRC_PAL_BGR32,   V4L2_PIX_FMT_BGR32  },
+	{ SRC_PAL_ABGR32,  V4L2_PIX_FMT_ABGR32  },
 	{ SRC_PAL_YUYV,    V4L2_PIX_FMT_YUYV   },
 	{ SRC_PAL_UYVY,    V4L2_PIX_FMT_UYVY   },
+	{ SRC_PAL_VYUY,    V4L2_PIX_FMT_VYUY   },
 	{ SRC_PAL_YUV420P, V4L2_PIX_FMT_YUV420 },
 	{ SRC_PAL_BAYER,   V4L2_PIX_FMT_SBGGR8 },
+	{ SRC_PAL_SBGGR8,  V4L2_PIX_FMT_SBGGR8 },
+	{ SRC_PAL_SRGGB8,  V4L2_PIX_FMT_SRGGB8 },
 	{ SRC_PAL_SGBRG8,  V4L2_PIX_FMT_SGBRG8 },
 	{ SRC_PAL_SGRBG8,  V4L2_PIX_FMT_SGRBG8 },
 	{ SRC_PAL_RGB565,  V4L2_PIX_FMT_RGB565 },
@@ -336,7 +340,7 @@ int src_v4l2_show_control(src_t *src, struct v4l2_queryctrl *queryctrl)
 			if(!ioctl(s->fd, VIDIOC_QUERYMENU, &querymenu))
 			{
 				strncat(t, (char *) querymenu.name, 32);
-				if(m < queryctrl->maximum) strncat(t, " | ", 3);
+				if(m < queryctrl->maximum) strcat(t, " | ");
 			}
 		}
 		
@@ -482,7 +486,6 @@ int src_v4l2_set_controls(src_t *src)
 {
 	src_v4l2_t *s = (src_v4l2_t *) src->state;
 	struct v4l2_queryctrl queryctrl;
-	int c;
 	
 	memset(&queryctrl, 0, sizeof(queryctrl));
 	
@@ -540,7 +543,7 @@ int src_v4l2_set_pix_format(src_t *src)
 	/* Step through each palette type. */
 	v4l2_pal = 0;
 	
-	if(src->palette != -1)
+	if(src->palette != SRC_PAL_ANY)
 	{
 		while(v4l2_palette[v4l2_pal].v4l2)
 		{
@@ -605,7 +608,7 @@ int src_v4l2_set_pix_format(src_t *src)
 			return(0);
 		}
 		
-		if(src->palette != -1) break;
+		if(src->palette != SRC_PAL_ANY) break;
 		
 		v4l2_pal++;
 	}

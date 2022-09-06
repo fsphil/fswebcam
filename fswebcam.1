@@ -1,4 +1,4 @@
-.TH FSWEBCAM "1" "13 January 2014" "fswebcam 20140113" "User Commands"
+.TH FSWEBCAM "1" "25 July 2020" "fswebcam 20200725" "User Commands"
 .SH NAME
 fswebcam \- Small and simple webcam for *nix.
 .SH SYNOPSIS
@@ -6,9 +6,9 @@ fswebcam \- Small and simple webcam for *nix.
 [\fI<options>\fR] \fI<filename>\fR [[\fI<options>\fR] \fI<filename>\fR ... ]
 .SH DESCRIPTION
 .PP
-fswebcam is a small and simple webcam app for *nix. It can capture images from a number of different sources and perform simple manipulation on the captured image. The image can be saved as one or more PNG or JPEG files.
+fswebcam is a small and simple webcam app for *nix. It can capture images from a number of different sources and perform simple manipulation on the captured image. The image can be saved as one or more PNG, JPEG or WEBP files.
 .PP
-The PNG or JPEG image can be sent to stdio using the filename "\-". The output filename is formatted by \fBstrftime\fR.
+The image can be sent to stdio using the filename "\-". The output filename is formatted by \fBstrftime\fR.
 
 .SH CONFIGURATION
 
@@ -54,6 +54,12 @@ Default behaviour is to capture a single image and exit.
 .TP
 \fB\-\-offset\fR \fI<seconds>\fR
 Sets the offset to use when calculating when the next image is due in loop mode. Value can be positive or negative.
+
+.TP
+\fB\-\-count\fR \fI<number>\fR
+Sets the number of times to capture an image in loop mode before exiting.
+.IP
+Default is 0, loop forever.
 
 .TP
 \fB\-b\fR, \fB\-\-background\fR
@@ -149,6 +155,10 @@ UYVY
 YUV420P
 .br
 BAYER
+.br
+SBGGR8
+.br
+SRGGB8
 .br
 SGBRG8
 .br
@@ -356,6 +366,12 @@ This is the default format, with a factor of "\-1".
 .TP
 \fB\-\-png\fR \fI<factor>\fR
 Set PNG as the output image format. The compression factor can be a value between 0 and 9, or \-1 for automatic.
+
+.TP
+\fB\-\-webp\fR \fI<factor>\fR
+Set WEBP as the output image format. The compression factor is a value between 0 and 100, or \-1 for automatic.
+.IP
+Requires WEBP support in libgd.
 
 .TP
 \fB\-\-save\fR \fI<filename>\fR

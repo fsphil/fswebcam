@@ -55,6 +55,8 @@ int src_raw_open(src_t *src)
 		free(s);
 		return(-1);
 	case SRC_PAL_RGB32:
+	case SRC_PAL_BGR32:
+	case SRC_PAL_ABGR32:
 		s->size = src->width * src->height * 4;
 		break;
 	case SRC_PAL_RGB24:
@@ -64,6 +66,7 @@ int src_raw_open(src_t *src)
 	case SRC_PAL_RGB555:
 	case SRC_PAL_YUYV:
 	case SRC_PAL_UYVY:
+	case SRC_PAL_VYUY:
 	case SRC_PAL_Y16:
 		s->size = src->width * src->height * 2;
 		break;
@@ -72,6 +75,8 @@ int src_raw_open(src_t *src)
 		s->size = (src->width * src->height * 3) / 2;
 		break;
 	case SRC_PAL_BAYER:
+	case SRC_PAL_SBGGR8:
+	case SRC_PAL_SRGGB8:
 	case SRC_PAL_SGBRG8:
 	case SRC_PAL_SGRBG8:
 	case SRC_PAL_GREY:

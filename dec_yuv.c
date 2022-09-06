@@ -29,8 +29,8 @@ int fswc_add_image_yuyv(src_t *src, avgbmp_t *abitmap)
 	
 	if(src->length < (src->width * src->height * 2)) return(-1);
 	
-	/* YUYV and UYVY are very similar and so  *
-	 * are both handled by this one function. */
+	/* YUYV and UYVY and VYUY are very similar and so  *
+	 * are all handled by this one function. */
 	
 	ptr = (uint8_t *) src->img;
 	z = 0;
@@ -50,13 +50,21 @@ int fswc_add_image_yuyv(src_t *src, avgbmp_t *abitmap)
 				u = ptr[0] - 128;
 				v = ptr[2] - 128;
 			}
-			else /* SRC_PAL_YUYV */
+			else if(src->palette == SRC_PAL_YUYV)
 			{
 				if(!z) y = ptr[0] << 8;
 				else   y = ptr[2] << 8;
 				
 				u = ptr[1] - 128;
 				v = ptr[3] - 128;
+			}
+			else if(src->palette == SRC_PAL_VYUY)
+			{
+				if(!z) y = ptr[1] << 8;
+				else   y = ptr[3] << 8;
+
+				u = ptr[2] - 128;
+				v = ptr[0] - 128;
 			}
 			
 			r = (y + (359 * v)) >> 8;

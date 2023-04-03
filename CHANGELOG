@@ -1,4 +1,8 @@
 
+fswebcam-
+  
+  - Fix use after free / double free in V4L1 source.
+
 fswebcam-20200725
   
   - Return a non-zero if the capture fails.

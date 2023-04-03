@@ -668,7 +668,6 @@ int src_v4l_set_read(src_t *src)
 	if(!s->buffer)
 	{
 		ERROR("Out of memory.");
-		src_v4l_close(src);
 		return(-1);
 	}
 	

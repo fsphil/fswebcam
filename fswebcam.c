@@ -178,6 +178,7 @@ typedef struct {
 	char *filename;
 	char format;
 	char compression;
+	uint8_t mkdir_output_file;
 	
 } fswebcam_config_t;
 
@@ -440,6 +441,59 @@ gdImage* fswc_gdImageDuplicate(gdImage* src)
 	return(dst);
 }
 
+int fswc_create_output_dir(char *filename)
+{
+	/* Step through the filename checking each segment of the path in turn.
+	 * If one does not exist, try creating it.  Return an error or 0 if
+	 * all paths created successfully.  Modifies but repairs filename */
+	int pos;
+	int len = strlen(filename);
+	int result;
+	struct stat st = {0};
+
+	/* First move the 'length' back to the last slash, since we don't want to
+	 * create a directory with the name of the filename */
+	for (len > 0; filename[len] != '/'; len--);
+	if (len == 0)
+	{
+		return 0;
+	}
+	/* We have to start with at least _some_ path, hence pos = 1 */
+	for (pos = 1; pos < len; pos++)
+	{
+		/* Look for a / character that divides the path. */
+		for (; pos <= len && filename[pos] != '/'; pos++);
+		if (pos > len) {
+			/* If went past the last directory, then we've got no more path
+			 * to create. */
+			break;
+		}
+		/* Terminate the string here for now */
+		filename[pos] = '\0';
+		/* Now stat and create if not found */
+		result = stat(filename, &st);
+		/* Can't put / back until after mkdir */
+		if (result == -1)
+		{
+			if (errno == ENOENT) {
+				result = mkdir(filename, 0700);
+				MSG("Creating path for '%s'", filename);
+				filename[pos] = '/';
+				if (result == -1)
+				{
+					return -1;
+				}
+			}
+			else
+			{
+				return -1;
+			}
+		}
+		filename[pos] = '/';
+	}
+	return 0;
+}
+
 int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 {
 	char filename[FILENAME_MAX];
@@ -480,13 +534,22 @@ int fswc_output(fswebcam_config_t *config, char *name, gdImage *image)
 		{
 			/* Can't load the font - display a warning */
 			WARN("Unable to load font '%s': %s", config->font, err);
-			WARN("Disabling the the banner.");
+			WARN("Disabling the banner.");
 		}
 	}
 	
 	/* Draw the overlay. */
 	fswc_draw_overlay(config, config->overlay, im);
 	
+	/* Do we need to check that the output directory exists? */
+	if (config->mkdir_output_file)
+	{
+		int err = fswc_create_output_dir(filename);
+		if (err < 0) {
+			WARN("Unable to create path to file '%s': %s", filename, strerror(errno));
+		}
+	}
+
 	/* Write to a file if a filename was given, otherwise stdout. */
 	if(strncmp(name, "-", 2)) f = fopen(filename, "wb");
 	else f = stdout;
@@ -1179,6 +1242,7 @@ int fswc_usage()
 #endif
 	       "     --save <filename>        Save image to file.\n"
 	       "     --exec <command>         Execute a command and wait for it to complete.\n"
+	       " -m, --mkdir                  Make all the directories in the path\n"
 	       "\n");
 	
 	return(0);
@@ -1427,9 +1491,10 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 #endif
 		{"save",            required_argument, 0, OPT_SAVE},
 		{"exec",            required_argument, 0, OPT_EXEC},
+		{"mkdir",           no_argument,       0, 'm'},
 		{0, 0, 0, 0}
 	};
-	char *opts = "-qc:vl:bL:d:i:t:f:D:T:r:F:s:S:p:R";
+	char *opts = "-qc:vl:bL:d:i:t:f:D:T:r:F:s:S:p:Rm";
 	
 	s.opts      = opts;
 	s.long_opts = long_opts;
@@ -1465,6 +1530,7 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 	config->dumpframe = NULL;
 	config->jobs = 0;
 	config->job = NULL;
+	config->mkdir_output_file = 0;
 	
 	/* Don't report errors. */
 	opterr = 0;
@@ -1573,6 +1639,9 @@ int fswc_getopts(fswebcam_config_t *config, int argc, char *argv[])
 			break;
 		case 'R':
 			config->use_read = -1;
+			break;
+		case 'm':
+			config->mkdir_output_file = 1;
 			break;
 		case OPT_LIST_FORMATS:
 			config->list |= SRC_LIST_FORMATS;
